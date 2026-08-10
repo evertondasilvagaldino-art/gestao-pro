@@ -540,11 +540,18 @@ async function salvarEtapas() {
 
 // ========== FIRESTORE HELPERS ==========
 async function getEmpresa(k) {
-  const doc = await db.collection('empresas').doc(k).get();
-  return doc.exists ? doc.data() : null;
+  try {
+    const doc = await Promise.race([
+      db.collection('empresas').doc(k).get(),
+      new Promise((_,reject) => setTimeout(()=>reject(new Error('timeout')), 8000))
+    ]);
+    return doc.exists ? doc.data() : null;
+  } catch(e) { console.error('getEmpresa:', e); return null; }
 }
 async function saveEmpresa(k, data) {
-  await db.collection('empresas').doc(k).set(data, { merge: true });
+  try {
+    await db.collection('empresas').doc(k).set(data, { merge: true });
+  } catch(e) { console.error('saveEmpresa:', e); throw e; }
 }
 async function getD() {
   const d = await getEmpresa(state.empresaAtual);
@@ -1400,10 +1407,19 @@ function setTema(tema) {
 }
 
 // ========== INIT ==========
-window.addEventListener('load', ()=>{
+window.addEventListener('load', async () => {
+  try {
+    // Testa conexão com Firebase com timeout
+    await Promise.race([
+      db.collection('empresas').limit(1).get(),
+      new Promise((_,reject) => setTimeout(()=>reject(new Error('timeout')), 5000))
+    ]);
+  } catch(e) {
+    console.warn('Firebase:', e.message);
+  }
   loading(false);
   document.getElementById('login-screen').style.display='flex';
-  const tema=localStorage.getItem('tema')||'azul';
+  const tema = localStorage.getItem('tema')||'azul';
   setTema(tema);
 });
 </script>
