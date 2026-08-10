@@ -194,6 +194,7 @@ tr:hover td { background:rgba(26,111,255,0.05); }
     <div class="sidebar-menu">
       <div class="menu-item active" onclick="irPara('dashboard')"><span class="icon">📊</span> Dashboard</div>
       <div class="menu-item" onclick="irPara('kanban')"><span class="icon">🗂️</span> CRM Kanban</div>
+      <div class="menu-item" onclick="irPara('etapas')"><span class="icon">🎯</span> Etapas</div>
       <div class="menu-item" onclick="irPara('funil')"><span class="icon">🔻</span> Funil de Vendas</div>
       <div class="menu-item" onclick="irPara('lancamentos')"><span class="icon">📝</span> Lançamentos</div>
       <div class="menu-item" onclick="irPara('consultoras')"><span class="icon">👥</span> Consultoras</div>
@@ -208,7 +209,8 @@ tr:hover td { background:rgba(26,111,255,0.05); }
         <button onclick="setTema('preto')" title="Preto" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#000,#1a1a1a);border:2px solid #444;cursor:pointer;"></button>
         <button onclick="setTema('branco')" title="Branco" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#fff,#eee);border:2px solid #ccc;cursor:pointer;"></button>
       </div>
-      <div id="user-logado" style="font-size:11px;color:#aaa;margin-bottom:5px;"></div>
+      <div id="user-logado" style="font-size:11px;color:#aaa;margin-bottom:3px;"></div>
+      <div id="user-perfil-badge" style="font-size:11px;color:var(--azul-neon);margin-bottom:5px;font-weight:600;"></div>
       <button id="btn-voltar-master" class="btn-logout" style="display:none;background:#e63946;color:white;margin-bottom:6px;" onclick="voltarMaster()">👑 Voltar ao Master</button>
       <button class="btn-logout" onclick="fazerLogout()">Sair</button>
     </div>
@@ -248,6 +250,50 @@ tr:hover td { background:rgba(26,111,255,0.05); }
       </div>
     </div>
 
+    <!-- ETAPAS -->
+    <div id="page-etapas" class="hidden">
+      <div class="page-header"><h2>🎯 Gerenciar Etapas</h2><p>Customize as etapas do Kanban e Funil</p></div>
+
+      <!-- ADICIONAR ETAPA -->
+      <div class="regras-box">
+        <h3>➕ Adicionar Nova Etapa</h3>
+        <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-top:10px;">
+          <div class="form-group" style="flex:1;min-width:200px;margin-bottom:0;">
+            <label style="color:var(--texto-claro);">Nome da Etapa</label>
+            <input type="text" id="nova-etapa-nome" placeholder="Ex: Proposta Enviada" />
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label style="color:var(--texto-claro);">Cor</label>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;" id="cores-picker">
+              ${CORES_DISPONIVEIS.map((c,i)=>`
+                <div onclick="selecionarCor('${c}')" id="cor-${i}"
+                  style="width:28px;height:28px;background:${c};border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all 0.2s;"
+                  title="${c}"></div>
+              `).join('')}
+            </div>
+            <input type="hidden" id="nova-etapa-cor" value="#3498db" />
+          </div>
+          <button class="btn-success" onclick="adicionarEtapa()" style="margin-bottom:0;">+ ADICIONAR</button>
+        </div>
+      </div>
+
+      <!-- ETAPAS ATUAIS -->
+      <div class="regras-box">
+        <h3>📋 Etapas Atuais <span style="font-size:12px;color:var(--texto-medio);font-weight:400;">(arraste para reordenar)</span></h3>
+        <div id="etapas-lista" style="margin-top:14px;"></div>
+        <div style="margin-top:16px;display:flex;gap:10px;">
+          <button class="btn-success" onclick="salvarEtapasUI()">💾 SALVAR ALTERAÇÕES</button>
+          <button class="btn-secondary" onclick="restaurarEtapasPadrao()">🔄 RESTAURAR PADRÃO</button>
+        </div>
+      </div>
+
+      <!-- PREVIEW FUNIL -->
+      <div class="funil-box">
+        <h3>👁️ Preview do Funil com as Etapas Atuais</h3>
+        <div style="display:flex;gap:8px;margin-top:14px;" id="etapas-preview"></div>
+      </div>
+    </div>
+
     <!-- KANBAN -->
     <div id="page-kanban" class="hidden">
       <div class="page-header"><h2>🗂️ CRM Kanban</h2><p>Gerencie seus leads por etapa</p></div>
@@ -255,6 +301,8 @@ tr:hover td { background:rgba(26,111,255,0.05); }
         <button class="btn-success" onclick="abrirModalLead()">+ Novo Lead</button>
         <select id="kanban-filter-cons" onchange="renderKanban()"><option value="">Todas as consultoras</option></select>
       </div>
+      <!-- RESUMO GERAL -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;" id="kanban-resumo"></div>
       <div class="kanban-board" id="kanban-board"></div>
     </div>
 
@@ -364,21 +412,61 @@ tr:hover td { background:rgba(26,111,255,0.05); }
 
     <!-- USUÁRIOS -->
     <div id="page-usuarios" class="hidden">
-      <div class="page-header"><h2>🔐 Usuários</h2></div>
+      <div class="page-header"><h2>🔐 Usuários</h2><p>Gerencie acessos e permissões</p></div>
+
+      <!-- TABELA DE PERMISSÕES -->
+      <div class="regras-box" style="margin-bottom:20px;">
+        <h3>📋 Permissões por Perfil</h3>
+        <table style="width:100%;border-collapse:collapse;margin-top:10px;">
+          <thead style="background:rgba(6,13,31,0.8);">
+            <tr>
+              <th style="padding:10px;font-size:12px;color:var(--texto-claro);text-align:left;">Módulo</th>
+              <th style="padding:10px;font-size:12px;color:#e63946;text-align:center;">🔴 Admin</th>
+              <th style="padding:10px;font-size:12px;color:#f39c12;text-align:center;">🟡 Gerente</th>
+              <th style="padding:10px;font-size:12px;color:#00cc44;text-align:center;">🟢 Visualizador</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${[
+              ['📊 Dashboard','✅','✅','✅'],
+              ['🗂️ CRM Kanban','✅','✅','✅'],
+              ['🔻 Funil de Vendas','✅','✅','❌'],
+              ['📝 Lançamentos','✅','✅','❌'],
+              ['👥 Consultoras','✅','✅','❌'],
+              ['💰 Comissões','✅','✅','❌'],
+              ['⚙️ Regras','✅','✅','❌'],
+              ['🔐 Usuários','✅','❌','❌'],
+            ].map(([m,a,g,v])=>`
+              <tr>
+                <td style="padding:10px;font-size:13px;color:var(--texto-claro);">${m}</td>
+                <td style="padding:10px;text-align:center;font-size:16px;">${a}</td>
+                <td style="padding:10px;text-align:center;font-size:16px;">${g}</td>
+                <td style="padding:10px;text-align:center;font-size:16px;">${v}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+
       <div class="table-box">
         <div class="table-header"><h3>Novo Usuário</h3></div>
         <div style="padding:18px;">
           <div class="form-grid">
             <div class="form-group"><label style="color:var(--texto-claro);">Usuário</label><input type="text" id="usr-nome" placeholder="Ex: gerente01" /></div>
             <div class="form-group"><label style="color:var(--texto-claro);">Senha</label><input type="password" id="usr-pass" placeholder="Senha" /></div>
-            <div class="form-group"><label style="color:var(--texto-claro);">Perfil</label><select id="usr-perfil"><option value="admin">Admin</option><option value="gerente">Gerente</option><option value="visualizador">Visualizador</option></select></div>
+            <div class="form-group"><label style="color:var(--texto-claro);">Perfil</label>
+              <select id="usr-perfil">
+                <option value="admin">🔴 Admin (acesso total)</option>
+                <option value="gerente">🟡 Gerente (sem usuários)</option>
+                <option value="visualizador">🟢 Visualizador (só dash e kanban)</option>
+              </select>
+            </div>
           </div>
           <button class="btn-success" onclick="salvarUsuario()">+ ADICIONAR USUÁRIO</button>
         </div>
       </div>
       <div class="table-box">
         <div class="table-header"><h3>Usuários Cadastrados</h3></div>
-        <table><thead><tr><th>Usuário</th><th>Perfil</th><th>Ação</th></tr></thead>
+        <table><thead><tr><th>Usuário</th><th>Perfil</th><th>Permissões</th><th>Ação</th></tr></thead>
         <tbody id="usr-body"></tbody></table>
       </div>
     </div>
@@ -394,14 +482,9 @@ tr:hover td { background:rgba(26,111,255,0.05); }
     <div class="form-group"><label style="color:var(--texto-claro);">Nome</label><input type="text" id="lead-nome" placeholder="Nome do lead" /></div>
     <div class="form-group"><label style="color:var(--texto-claro);">Telefone</label><input type="text" id="lead-tel" placeholder="(21) 99999-9999" /></div>
     <div class="form-group"><label style="color:var(--texto-claro);">Consultora</label><select id="lead-cons"></select></div>
-    <div class="form-group"><label style="color:var(--texto-claro);">Etapa</label>
-      <select id="lead-etapa">
-        <option value="Agendamento">📅 Agendamento</option>
-        <option value="Comparecimento">👣 Comparecimento</option>
-        <option value="Apresentação">🎯 Apresentação</option>
-        <option value="Análise">🔍 Análise</option>
-        <option value="Fechamento">✅ Fechamento</option>
-      </select>
+    <div id="lead-etapa-wrap" class="form-group">
+      <label style="color:var(--texto-claro);">Etapa</label>
+      <select id="lead-etapa"></select>
     </div>
     <div class="form-group"><label style="color:var(--texto-claro);">Valor Potencial (R$)</label><input type="number" id="lead-valor" placeholder="0.00" step="0.01" /></div>
     <div class="form-group"><label style="color:var(--texto-claro);">Observação</label><input type="text" id="lead-obs" placeholder="Opcional" /></div>
@@ -427,12 +510,33 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// ========== ESTADO ==========
-let state = { empresaAtual: null, usuarioLogado: null };
-const MASTER = { usuario: 'master', senha: 'gex@master2026' };
-const MESES = ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-const ETAPAS = ['Agendamento','Comparecimento','Apresentação','Análise','Fechamento'];
-const ETAPA_CORES = { 'Agendamento':'#3498db','Comparecimento':'#9b59b6','Apresentação':'#e67e22','Análise':'#e74c3c','Fechamento':'#2ecc71' };
+// ========== ETAPAS ==========
+const ETAPAS_PADRAO = ['Agendamento','Comparecimento','Apresentação','Análise','Fechamento'];
+const ETAPA_CORES_PADRAO = {
+  'Agendamento':'#3498db','Comparecimento':'#9b59b6',
+  'Apresentação':'#e67e22','Análise':'#e74c3c','Fechamento':'#2ecc71'
+};
+const CORES_DISPONIVEIS = ['#3498db','#9b59b6','#e67e22','#e74c3c','#2ecc71','#1a6fff','#00cc44','#f39c12','#e91e63','#00bcd4','#ff5722','#607d8b'];
+
+let ETAPAS = [...ETAPAS_PADRAO];
+let ETAPA_CORES = {...ETAPA_CORES_PADRAO};
+
+async function carregarEtapas() {
+  const d = await getD();
+  if (d.etapas && d.etapas.length > 0) {
+    ETAPAS = d.etapas.map(e => e.nome);
+    ETAPA_CORES = {};
+    d.etapas.forEach(e => ETAPA_CORES[e.nome] = e.cor);
+  } else {
+    ETAPAS = [...ETAPAS_PADRAO];
+    ETAPA_CORES = {...ETAPA_CORES_PADRAO};
+  }
+}
+async function salvarEtapas() {
+  const d = await getD();
+  d.etapas = ETAPAS.map(nome => ({ nome, cor: ETAPA_CORES[nome] || '#3498db' }));
+  await saveD(d);
+}
 
 // ========== FIRESTORE HELPERS ==========
 async function getEmpresa(k) {
@@ -525,11 +629,13 @@ async function fazerLogin() {
     state.empresaAtual = k;
     state.usuarioLogado = user;
     document.getElementById('empresa-nome').textContent = empresa.nomeEmpresa;
-    document.getElementById('user-logado').textContent = '👤 '+user.nome+' ('+user.perfil+')';
+    document.getElementById('user-logado').textContent = '👤 '+user.nome;
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
     loading(false);
+    aplicarPermissoes();
     popularSelects();
+    await carregarEtapas();
     irPara('dashboard');
   } catch(e) { loading(false); showAlert('Erro: '+e.message); }
 }
@@ -636,8 +742,59 @@ function voltarMaster() {
   renderMaster();
 }
 
+// ========== PERMISSÕES POR PERFIL ==========
+const PERFIL_PERMISSOES = {
+  admin:        ['dashboard','kanban','funil','lancamentos','consultoras','comissoes','regras','usuarios'],
+  master:       ['dashboard','kanban','funil','lancamentos','consultoras','comissoes','regras','usuarios'],
+  gerente:      ['dashboard','kanban','funil','lancamentos','consultoras','comissoes','regras'],
+  visualizador: ['dashboard','kanban']
+};
+
+function temPermissao(pagina) {
+  const perfil = state.usuarioLogado?.perfil || 'visualizador';
+  return (PERFIL_PERMISSOES[perfil] || ['dashboard','kanban']).includes(pagina);
+}
+
+function aplicarPermissoes() {
+  const perfil = state.usuarioLogado?.perfil || 'visualizador';
+  const permitidas = PERFIL_PERMISSOES[perfil] || ['dashboard','kanban'];
+  const menus = {
+    'dashboard':   "irPara('dashboard')",
+    'kanban':      "irPara('kanban')",
+    'funil':       "irPara('funil')",
+    'lancamentos': "irPara('lancamentos')",
+    'consultoras': "irPara('consultoras')",
+    'comissoes':   "irPara('comissoes')",
+    'regras':      "irPara('regras')",
+    'usuarios':    "irPara('usuarios')"
+  };
+  document.querySelectorAll('.menu-item').forEach(m => {
+    const onclick = m.getAttribute('onclick') || '';
+    const pagina = Object.keys(menus).find(k => onclick.includes("'"+k+"'"));
+    if (pagina) {
+      if (permitidas.includes(pagina)) {
+        m.style.display = 'flex';
+      } else {
+        m.style.display = 'none';
+      }
+    }
+  });
+  // Badge de perfil na sidebar
+  const badge = {
+    admin: '🔴 Admin', master: '👑 Master',
+    gerente: '🟡 Gerente', visualizador: '🟢 Visualizador'
+  };
+  const perfilEl = document.getElementById('user-perfil-badge');
+  if (perfilEl) perfilEl.textContent = badge[perfil] || perfil;
+}
+
 // ========== NAVEGAÇÃO ==========
 function irPara(p) {
+  // Verifica permissão
+  if (!temPermissao(p)) {
+    alert('⛔ Você não tem permissão para acessar esta área!');
+    return;
+  }
   document.querySelectorAll('[id^="page-"]').forEach(x=>x.classList.add('hidden'));
   document.querySelectorAll('.menu-item').forEach(x=>x.classList.remove('active'));
   document.getElementById('page-'+p).classList.remove('hidden');
@@ -645,8 +802,9 @@ function irPara(p) {
     if(m.getAttribute('onclick')&&m.getAttribute('onclick').includes("'"+p+"'")) m.classList.add('active');
   });
   if(p==='dashboard') atualizarDashboard();
-  if(p==='kanban') renderKanban();
-  if(p==='funil') renderFunil();
+  if(p==='kanban') { await carregarEtapas(); renderKanban(); }
+  if(p==='funil') { await carregarEtapas(); renderFunil(); }
+  if(p==='etapas') { await carregarEtapas(); renderEtapasUI(); }
   if(p==='lancamentos') renderLancamentos();
   if(p==='consultoras') renderConsultoras();
   if(p==='comissoes') renderComissoes();
@@ -776,12 +934,143 @@ async function removerLanc(id) {
   renderLancamentos();
 }
 
+// ========== GERENCIAR ETAPAS UI ==========
+let corSelecionada = '#3498db';
+
+function selecionarCor(cor) {
+  corSelecionada = cor;
+  document.getElementById('nova-etapa-cor').value = cor;
+  document.querySelectorAll('#cores-picker div').forEach(el => {
+    el.style.border = el.style.background === cor ? '3px solid white' : '3px solid transparent';
+  });
+}
+
+function renderEtapasUI() {
+  // Lista de etapas editáveis
+  document.getElementById('etapas-lista').innerHTML = ETAPAS.map((etapa, i) => `
+    <div id="etapa-item-${i}" draggable="true"
+      ondragstart="dragEtapaStart(event,${i})"
+      ondragover="event.preventDefault()"
+      ondrop="dropEtapa(event,${i})"
+      style="display:flex;align-items:center;gap:10px;padding:12px;background:rgba(255,255,255,0.05);border:1px solid var(--borda);border-radius:8px;margin-bottom:8px;cursor:grab;">
+      <span style="color:#aaa;font-size:16px;">☰</span>
+      <div style="width:24px;height:24px;border-radius:50%;background:${ETAPA_CORES[etapa]||'#3498db'};flex-shrink:0;cursor:pointer;"
+        onclick="abrirCorEtapa(${i})" title="Clique para mudar a cor"></div>
+      <input type="text" value="${etapa}" id="etapa-nome-${i}"
+        style="flex:1;padding:8px;border:1px solid var(--borda);border-radius:6px;background:rgba(255,255,255,0.05);color:white;font-size:14px;" />
+      <input type="color" id="etapa-cor-${i}" value="${ETAPA_CORES[etapa]||'#3498db'}"
+        onchange="atualizarCorEtapa(${i})"
+        style="width:36px;height:36px;border:none;border-radius:6px;cursor:pointer;background:transparent;" />
+      ${ETAPAS_PADRAO.includes(etapa)
+        ? `<span style="font-size:10px;color:#aaa;white-space:nowrap;">⭐ Padrão</span>`
+        : `<button class="btn-danger" onclick="removerEtapa(${i})">✕</button>`
+      }
+    </div>
+  `).join('');
+
+  // Preview funil
+  document.getElementById('etapas-preview').innerHTML = ETAPAS.map(etapa => `
+    <div style="flex:1;text-align:center;">
+      <div style="height:60px;background:${ETAPA_CORES[etapa]||'#3498db'};border-radius:6px 6px 0 0;display:flex;align-items:center;justify-content:center;">
+        <span style="font-size:11px;font-weight:700;color:white;">0</span>
+      </div>
+      <div style="font-size:10px;color:var(--texto-medio);margin-top:6px;font-weight:600;">${etapa}</div>
+    </div>
+  `).join('');
+}
+
+function abrirCorEtapa(i) {
+  document.getElementById('etapa-cor-'+i).click();
+}
+
+function atualizarCorEtapa(i) {
+  const cor = document.getElementById('etapa-cor-'+i).value;
+  const nome = document.getElementById('etapa-nome-'+i).value;
+  ETAPA_CORES[nome] = cor;
+  renderEtapasUI();
+}
+
+function adicionarEtapa() {
+  const nome = document.getElementById('nova-etapa-nome').value.trim();
+  const cor = document.getElementById('nova-etapa-cor').value || corSelecionada;
+  if (!nome) return alert('Informe o nome da etapa!');
+  if (ETAPAS.includes(nome)) return alert('Etapa já existe!');
+  ETAPAS.push(nome);
+  ETAPA_CORES[nome] = cor;
+  document.getElementById('nova-etapa-nome').value='';
+  renderEtapasUI();
+}
+
+function removerEtapa(i) {
+  const nome = ETAPAS[i];
+  if (ETAPAS_PADRAO.includes(nome)) return alert('Não é possível remover etapas padrão!');
+  if (!confirm(`Remover etapa "${nome}"? Os leads nessa etapa serão movidos para "Agendamento".`)) return;
+  ETAPAS.splice(i,1);
+  delete ETAPA_CORES[nome];
+  renderEtapasUI();
+}
+
+async function salvarEtapasUI() {
+  // Pega os nomes editados dos inputs
+  const novasEtapas = [];
+  const novasCores = {};
+  ETAPAS.forEach((_, i) => {
+    const nomeInput = document.getElementById('etapa-nome-'+i);
+    const corInput = document.getElementById('etapa-cor-'+i);
+    if (nomeInput) {
+      const nome = nomeInput.value.trim();
+      const cor = corInput ? corInput.value : ETAPA_CORES[ETAPAS[i]];
+      if (nome) { novasEtapas.push(nome); novasCores[nome] = cor; }
+    }
+  });
+  ETAPAS.length = 0;
+  ETAPAS.push(...novasEtapas);
+  Object.keys(ETAPA_CORES).forEach(k => delete ETAPA_CORES[k]);
+  Object.assign(ETAPA_CORES, novasCores);
+  loading(true);
+  await salvarEtapas();
+  // Atualiza select do modal de lead
+  const sel = document.getElementById('lead-etapa');
+  if (sel) sel.innerHTML = ETAPAS.map(e=>`<option value="${e}">${e}</option>`).join('');
+  loading(false);
+  renderEtapasUI();
+  alert('✅ Etapas salvas com sucesso!');
+}
+
+async function restaurarEtapasPadrao() {
+  if (!confirm('Restaurar as etapas padrão? As etapas personalizadas serão removidas.')) return;
+  ETAPAS.length = 0;
+  ETAPAS.push(...ETAPAS_PADRAO);
+  Object.keys(ETAPA_CORES).forEach(k => delete ETAPA_CORES[k]);
+  Object.assign(ETAPA_CORES, ETAPA_CORES_PADRAO);
+  loading(true);
+  await salvarEtapas();
+  loading(false);
+  renderEtapasUI();
+  alert('✅ Etapas restauradas ao padrão!');
+}
+
+// Drag and Drop de etapas
+let dragEtapaIdx = null;
+function dragEtapaStart(e, i) { dragEtapaIdx = i; }
+function dropEtapa(e, i) {
+  if (dragEtapaIdx === null || dragEtapaIdx === i) return;
+  const etapa = ETAPAS.splice(dragEtapaIdx, 1)[0];
+  ETAPAS.splice(i, 0, etapa);
+  dragEtapaIdx = null;
+  renderEtapasUI();
+}
+
 // ========== LEADS / KANBAN ==========
 async function abrirModalLead(leadId) {
   const d = await getD();
+  // Popular consultoras
   const selCons = document.getElementById('lead-cons');
   const todas = (d.consultoras||[]).filter(c=>c.status==='Ativa');
   selCons.innerHTML = todas.length ? todas.map(c=>`<option value="${c.nome}">${c.nome}</option>`).join('') : '<option value="">Sem consultora</option>';
+  // Popular etapas dinâmicas
+  const selEtapa = document.getElementById('lead-etapa');
+  selEtapa.innerHTML = ETAPAS.map(e=>`<option value="${e}">${e}</option>`).join('');
   if (leadId) {
     const lead = (d.leads||[]).find(l=>l.id===leadId);
     if (!lead) return;
@@ -790,7 +1079,7 @@ async function abrirModalLead(leadId) {
     document.getElementById('lead-nome').value=lead.nome||'';
     document.getElementById('lead-tel').value=lead.tel||'';
     document.getElementById('lead-cons').value=lead.cons||'';
-    document.getElementById('lead-etapa').value=lead.etapa||'Agendamento';
+    document.getElementById('lead-etapa').value=lead.etapa||ETAPAS[0];
     document.getElementById('lead-valor').value=lead.valor||0;
     document.getElementById('lead-obs').value=lead.obs||'';
   } else {
@@ -798,7 +1087,7 @@ async function abrirModalLead(leadId) {
     document.getElementById('lead-id').value='';
     ['lead-nome','lead-tel','lead-obs'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('lead-valor').value=0;
-    document.getElementById('lead-etapa').value='Agendamento';
+    document.getElementById('lead-etapa').value=ETAPAS[0];
   }
   abrirModal('modal-lead');
 }
@@ -834,8 +1123,15 @@ async function renderKanban() {
   if (filtCons) leads = leads.filter(l=>l.cons===filtCons);
   document.getElementById('kanban-board').innerHTML=ETAPAS.map(etapa=>{
     const cards = leads.filter(l=>l.etapa===etapa);
+    const totalValor = cards.reduce((s,l)=>s+(l.valor||0),0);
     return `<div class="kanban-col" id="col-${etapa}" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="onDrop(event,'${etapa}')">
-      <div class="kanban-col-header"><div class="kanban-col-title">${etapa}</div><span class="kanban-count">${cards.length}</span></div>
+      <div class="kanban-col-header">
+        <div>
+          <div class="kanban-col-title">${etapa}</div>
+          ${totalValor>0?`<div style="font-size:11px;color:#00cc44;font-weight:700;margin-top:2px;">💰 ${fmt(totalValor)}</div>`:'<div style="font-size:11px;color:var(--texto-medio);margin-top:2px;">R$ 0,00</div>'}
+        </div>
+        <span class="kanban-count">${cards.length}</span>
+      </div>
       ${cards.map(l=>`<div class="kanban-card" draggable="true" ondragstart="onDragStart(event,${l.id})">
         <div class="card-nome">${l.nome}</div>
         <div class="card-tel">📞 ${l.tel||'-'}</div>
@@ -1047,14 +1343,42 @@ async function salvarUsuario() {
   document.getElementById('usr-pass').value='';
   renderUsuarios();
 }
+async function alterarPerfil(i, novoPerfil) {
+  loading(true);
+  const d = await getD();
+  d.usuarios[i].perfil = novoPerfil;
+  await saveD(d);
+  loading(false);
+  renderUsuarios();
+}
 async function renderUsuarios() {
   loading(true);
   const d = await getD();
   loading(false);
-  document.getElementById('usr-body').innerHTML=(d.usuarios||[]).map((u,i)=>`
-    <tr><td><strong>${u.nome}</strong></td><td><span class="badge badge-ok">${u.perfil}</span></td>
-    <td>${u.perfil!=='admin'?`<button class="btn-danger" onclick="removerUsr(${i})">Remover</button>`:'-'}</td></tr>
-  `).join('');
+  const perfilInfo = {
+    admin:        { label:'🔴 Admin',        cor:'#e63946', perms:'Acesso total ao sistema' },
+    gerente:      { label:'🟡 Gerente',      cor:'#f39c12', perms:'Tudo exceto Usuários' },
+    visualizador: { label:'🟢 Visualizador', cor:'#00cc44', perms:'Dashboard e CRM Kanban' }
+  };
+  document.getElementById('usr-body').innerHTML=(d.usuarios||[]).map((u,i)=>{
+    const info = perfilInfo[u.perfil] || perfilInfo.visualizador;
+    const isAdmin = u.perfil === 'admin';
+    return `<tr>
+      <td><strong>${u.nome}</strong></td>
+      <td><span style="background:rgba(255,255,255,0.1);color:${info.cor};border:1px solid ${info.cor};padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;">${info.label}</span></td>
+      <td style="font-size:12px;color:var(--texto-medio);">${info.perms}</td>
+      <td style="display:flex;gap:6px;align-items:center;">
+        ${!isAdmin ? `
+          <select onchange="alterarPerfil(${i},this.value)" style="padding:4px 8px;border:1px solid var(--borda);border-radius:6px;font-size:12px;background:rgba(255,255,255,0.05);color:white;">
+            <option value="admin" ${u.perfil==='admin'?'selected':''}>🔴 Admin</option>
+            <option value="gerente" ${u.perfil==='gerente'?'selected':''}>🟡 Gerente</option>
+            <option value="visualizador" ${u.perfil==='visualizador'?'selected':''}>🟢 Visualizador</option>
+          </select>
+          <button class="btn-danger" onclick="removerUsr(${i})">Remover</button>
+        ` : '<span style="color:#aaa;font-size:12px;">Protegido</span>'}
+      </td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="4" style="text-align:center;color:#aaa;padding:20px;">Nenhum usuário</td></tr>';
 }
 async function removerUsr(i) {
   if (!confirm('Remover usuário?')) return;
