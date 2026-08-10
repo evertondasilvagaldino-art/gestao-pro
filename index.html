@@ -3,100 +3,48 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gestão Pro</title>
+<title>Gestão Pro - GEX Company</title>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
 :root {
-  --preto:#060d1f;
-  --azul-escuro:#0a1428;
-  --azul:#0d1f4e;
-  --azul-medio:#1a3a7a;
-  --azul-eletrico:#1a6fff;
-  --azul-neon:#4da6ff;
-  --verde:#00cc44;
-  --verde-hover:#00aa33;
-  --vermelho:#e63946;
-  --branco:#ffffff;
-  --cinza:#0f1e40;
-  --borda:#1e3060;
-  --texto-claro:#c8d8ff;
-  --texto-medio:#7a99cc;
+  --preto:#060d1f; --azul-escuro:#0a1428; --azul:#0d1f4e;
+  --azul-medio:#1a3a7a; --azul-eletrico:#1a6fff; --azul-neon:#4da6ff;
+  --verde:#00cc44; --vermelho:#e63946; --branco:#ffffff;
+  --cinza:#0f1e40; --borda:#1e3060; --texto-claro:#c8d8ff; --texto-medio:#7a99cc;
 }
 body { background:var(--azul-escuro); color:var(--branco); }
 
 /* LOGIN */
-#login-screen {
-  min-height:100vh;
-  background:linear-gradient(135deg,#060d1f 0%,#0a1835 50%,#0d2060 100%);
-  display:flex; align-items:center; justify-content:center;
-}
-.login-box {
-  background:rgba(10,20,60,0.95);
-  border:1px solid var(--borda);
-  padding:40px; border-radius:16px; width:100%; max-width:420px;
-  box-shadow:0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(26,111,255,0.1);
-}
-.login-box h1 { text-align:center; color:var(--branco); margin-bottom:4px; font-size:22px; font-weight:800; }
-.login-box p { text-align:center; color:var(--texto-medio); margin-bottom:28px; font-size:13px; }
+#login-screen { min-height:100vh; background:linear-gradient(135deg,#060d1f 0%,#0a1835 50%,#0d2060 100%); display:flex; align-items:center; justify-content:center; }
+.login-box { background:rgba(10,20,60,0.95); border:1px solid var(--borda); padding:40px; border-radius:16px; width:100%; max-width:420px; box-shadow:0 20px 60px rgba(0,0,0,0.6); }
 .form-group { margin-bottom:14px; }
-.form-group label { display:block; font-size:12px; color:var(--texto-claro); margin-bottom:5px; font-weight:600; letter-spacing:0.5px; }
-.form-group input, .form-group select, .form-group textarea {
-  width:100%; padding:11px 14px;
-  border:1px solid var(--borda);
-  border-radius:8px; font-size:14px;
-  background:rgba(255,255,255,0.05);
-  color:var(--branco);
-  transition:border 0.2s, box-shadow 0.2s;
-}
+.form-group label { display:block; font-size:12px; color:var(--texto-claro); margin-bottom:5px; font-weight:600; }
+.form-group input, .form-group select { width:100%; padding:11px 14px; border:1px solid var(--borda); border-radius:8px; font-size:14px; background:rgba(255,255,255,0.05); color:var(--branco); }
 .form-group input::placeholder { color:var(--texto-medio); }
-.form-group input:focus, .form-group select:focus {
-  outline:none; border-color:var(--azul-eletrico);
-  box-shadow:0 0 0 3px rgba(26,111,255,0.15);
-}
-.form-group select option { background:#0a1428; color:white; }
-.btn-primary {
-  width:100%; padding:13px;
-  background:linear-gradient(135deg,#1a6fff,#0044cc);
-  color:white; border:none; border-radius:8px;
-  font-size:15px; font-weight:700; cursor:pointer;
-  transition:all 0.2s; letter-spacing:0.5px;
-}
-.btn-primary:hover { background:linear-gradient(135deg,#2a7fff,#1155dd); transform:translateY(-1px); }
+.form-group input:focus, .form-group select:focus { outline:none; border-color:var(--azul-eletrico); }
+.form-group select option { background:#0a1428; }
+.btn-primary { width:100%; padding:13px; background:linear-gradient(135deg,#1a6fff,#0044cc); color:white; border:none; border-radius:8px; font-size:15px; font-weight:700; cursor:pointer; margin-top:4px; }
+.btn-primary:hover { background:linear-gradient(135deg,#2a7fff,#1155dd); }
 .login-toggle { text-align:center; margin-top:14px; font-size:13px; color:var(--texto-medio); }
 .login-toggle span { color:var(--azul-neon); cursor:pointer; font-weight:600; }
+.alert { padding:10px 14px; border-radius:8px; margin-bottom:12px; font-size:13px; }
+.alert-error { background:rgba(230,57,70,0.2); color:#ff6b78; border:1px solid rgba(230,57,70,0.3); }
+.alert-success { background:rgba(0,204,68,0.2); color:#00cc44; border:1px solid rgba(0,204,68,0.3); }
 
 /* LAYOUT */
 #app { display:none; min-height:100vh; }
-.sidebar {
-  width:230px;
-  background:linear-gradient(180deg,#060d1f 0%,#0a1428 100%);
-  border-right:1px solid var(--borda);
-  position:fixed; top:0; left:0; height:100vh;
-  padding:20px 0; display:flex; flex-direction:column; z-index:100;
-}
+.sidebar { width:230px; background:linear-gradient(180deg,#060d1f 0%,#0a1428 100%); border-right:1px solid var(--borda); position:fixed; top:0; left:0; height:100vh; padding:20px 0; display:flex; flex-direction:column; z-index:100; }
 .sidebar-menu { padding:12px 0; flex:1; overflow-y:auto; }
-.menu-item {
-  padding:11px 18px; color:var(--texto-medio);
-  cursor:pointer; display:flex; align-items:center;
-  gap:9px; font-size:13px; transition:all 0.2s;
-  border-left:3px solid transparent;
-}
-.menu-item:hover, .menu-item.active {
-  background:rgba(26,111,255,0.12);
-  color:var(--azul-neon);
-  border-left-color:var(--azul-eletrico);
-}
+.menu-item { padding:11px 18px; color:var(--texto-medio); cursor:pointer; display:flex; align-items:center; gap:9px; font-size:13px; transition:all 0.2s; border-left:3px solid transparent; }
+.menu-item:hover, .menu-item.active { background:rgba(26,111,255,0.12); color:var(--azul-neon); border-left-color:var(--azul-eletrico); }
 .menu-item .icon { font-size:16px; width:22px; text-align:center; }
 .sidebar-footer { padding:14px 18px; border-top:1px solid var(--borda); }
-.btn-logout {
-  padding:8px 14px;
-  background:rgba(255,255,255,0.05);
-  color:var(--texto-medio);
-  border:1px solid var(--borda);
-  border-radius:6px; cursor:pointer; font-size:12px;
-  width:100%; margin-top:6px; transition:all 0.2s;
-}
-.btn-logout:hover { background:var(--vermelho); color:white; border-color:var(--vermelho); }
+.btn-logout { padding:8px 14px; background:rgba(255,255,255,0.05); color:var(--texto-medio); border:1px solid var(--borda); border-radius:6px; cursor:pointer; font-size:12px; width:100%; margin-top:6px; }
+.btn-logout:hover { background:var(--vermelho); color:white; }
 .main-content { margin-left:230px; padding:26px; }
 .page-header { margin-bottom:20px; }
 .page-header h2 { font-size:20px; color:var(--branco); font-weight:700; }
@@ -104,31 +52,14 @@ body { background:var(--azul-escuro); color:var(--branco); }
 
 /* CARDS */
 .cards-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px; }
-.card {
-  background:linear-gradient(135deg,rgba(10,20,60,0.9),rgba(15,30,80,0.9));
-  border:1px solid var(--borda);
-  border-radius:12px; padding:18px;
-  box-shadow:0 4px 20px rgba(0,0,0,0.3);
-  border-top:3px solid var(--azul-eletrico);
-  transition:transform 0.2s, box-shadow 0.2s;
-}
-.card:hover { transform:translateY(-2px); box-shadow:0 8px 30px rgba(26,111,255,0.15); }
+.card { background:linear-gradient(135deg,rgba(10,20,60,0.9),rgba(15,30,80,0.9)); border:1px solid var(--borda); border-radius:12px; padding:18px; box-shadow:0 4px 20px rgba(0,0,0,0.3); border-top:3px solid var(--azul-eletrico); }
 .card-label { font-size:11px; color:var(--texto-medio); text-transform:uppercase; letter-spacing:0.8px; }
 .card-value { font-size:22px; font-weight:800; color:var(--branco); margin-top:5px; }
 .card-sub { font-size:11px; color:var(--texto-medio); margin-top:3px; }
 
 /* TABLE */
-.table-box {
-  background:rgba(10,20,60,0.8);
-  border:1px solid var(--borda);
-  border-radius:12px; overflow:hidden; margin-bottom:20px;
-}
-.table-header {
-  padding:14px 18px;
-  background:linear-gradient(135deg,#1a3a7a,#0d2a5e);
-  color:white; display:flex; justify-content:space-between; align-items:center;
-  border-bottom:1px solid var(--borda);
-}
+.table-box { background:rgba(10,20,60,0.8); border:1px solid var(--borda); border-radius:12px; overflow:hidden; margin-bottom:20px; }
+.table-header { padding:14px 18px; background:linear-gradient(135deg,#1a3a7a,#0d2a5e); color:white; display:flex; justify-content:space-between; align-items:center; }
 .table-header h3 { font-size:14px; font-weight:600; }
 table { width:100%; border-collapse:collapse; }
 thead { background:rgba(6,13,31,0.8); }
@@ -142,110 +73,50 @@ tr:hover td { background:rgba(26,111,255,0.05); }
 .badge-inativa { background:rgba(230,57,70,0.15); color:#ff6b78; border:1px solid rgba(230,57,70,0.3); }
 
 /* BUTTONS */
-.btn-success {
-  padding:10px 18px;
-  background:linear-gradient(135deg,#00cc44,#009933);
-  color:white; border:none; border-radius:8px;
-  cursor:pointer; font-size:13px; font-weight:700;
-  transition:all 0.2s; letter-spacing:0.3px;
-}
-.btn-success:hover { background:linear-gradient(135deg,#00dd55,#00aa33); transform:translateY(-1px); }
-.btn-danger { padding:5px 10px; background:rgba(230,57,70,0.2); color:#ff6b78; border:1px solid rgba(230,57,70,0.4); border-radius:5px; cursor:pointer; font-size:11px; transition:all 0.2s; }
+.btn-success { padding:10px 18px; background:linear-gradient(135deg,#00cc44,#009933); color:white; border:none; border-radius:8px; cursor:pointer; font-size:13px; font-weight:700; }
+.btn-success:hover { background:linear-gradient(135deg,#00dd55,#00aa33); }
+.btn-danger { padding:5px 10px; background:rgba(230,57,70,0.2); color:#ff6b78; border:1px solid rgba(230,57,70,0.4); border-radius:5px; cursor:pointer; font-size:11px; }
 .btn-danger:hover { background:var(--vermelho); color:white; }
 .btn-secondary { padding:10px 18px; background:linear-gradient(135deg,#1a6fff,#0044cc); color:white; border:none; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; }
-.btn-secondary:hover { background:linear-gradient(135deg,#2a7fff,#1155dd); }
-.btn-sm { padding:5px 10px; border:none; border-radius:5px; cursor:pointer; font-size:11px; font-weight:600; transition:all 0.2s; }
+.btn-sm { padding:5px 10px; border:none; border-radius:5px; cursor:pointer; font-size:11px; font-weight:600; }
 
 /* FILTER */
-.filter-bar {
-  background:rgba(10,20,60,0.8);
-  border:1px solid var(--borda);
-  padding:14px 18px; border-radius:10px;
-  margin-bottom:16px; display:flex; gap:10px;
-  align-items:center; flex-wrap:wrap;
-}
-.filter-bar select, .filter-bar input {
-  padding:7px 10px;
-  border:1px solid var(--borda);
-  border-radius:6px; font-size:13px;
-  background:rgba(255,255,255,0.05);
-  color:var(--branco);
-}
+.filter-bar { background:rgba(10,20,60,0.8); border:1px solid var(--borda); padding:14px 18px; border-radius:10px; margin-bottom:16px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.filter-bar select, .filter-bar input { padding:7px 10px; border:1px solid var(--borda); border-radius:6px; font-size:13px; background:rgba(255,255,255,0.05); color:var(--branco); }
 .filter-bar select option { background:#0a1428; }
 .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-
-/* UTILS */
-.text-green { color:#00cc44; font-weight:700; }
-.text-red { color:#ff6b78; font-weight:700; }
-.hidden { display:none !important; }
-
-/* CHART */
-.chart-box {
-  background:rgba(10,20,60,0.8);
-  border:1px solid var(--borda);
-  border-radius:12px; padding:18px; margin-bottom:20px;
-}
-.chart-box h3 { color:var(--branco); font-size:14px; margin-bottom:14px; }
-.bar-chart { display:flex; align-items:flex-end; gap:10px; height:140px; }
-.bar-wrap { display:flex; flex-direction:column; align-items:center; flex:1; height:100%; justify-content:flex-end; }
-.bar { width:100%; background:linear-gradient(0deg,#1a6fff,#4da6ff); border-radius:4px 4px 0 0; transition:height 0.5s; }
-.bar:hover { background:linear-gradient(0deg,#00cc44,#00ee55); }
-.bar-label { font-size:10px; color:var(--texto-medio); margin-top:5px; text-align:center; }
-.bar-val { font-size:9px; color:var(--azul-neon); font-weight:700; margin-bottom:3px; }
-
-/* REGRAS */
-.regras-box {
-  background:rgba(10,20,60,0.8);
-  border:1px solid var(--borda);
-  border-radius:12px; padding:22px; margin-bottom:18px;
-}
+.regras-box { background:rgba(10,20,60,0.8); border:1px solid var(--borda); border-radius:12px; padding:22px; margin-bottom:18px; }
 .regras-box h3 { color:var(--azul-neon); margin-bottom:14px; font-size:15px; }
 .regra-row { display:flex; gap:10px; align-items:center; margin-bottom:10px; }
 .regra-row input { padding:7px; border:1px solid var(--borda); border-radius:6px; width:110px; font-size:13px; background:rgba(255,255,255,0.05); color:white; }
 .regra-row label { font-size:13px; color:var(--texto-claro); width:200px; }
+.chart-box { background:rgba(10,20,60,0.8); border:1px solid var(--borda); border-radius:12px; padding:18px; margin-bottom:20px; }
+.chart-box h3 { color:var(--branco); font-size:14px; margin-bottom:14px; }
+.bar-chart { display:flex; align-items:flex-end; gap:10px; height:140px; }
+.bar-wrap { display:flex; flex-direction:column; align-items:center; flex:1; height:100%; justify-content:flex-end; }
+.bar { width:100%; background:linear-gradient(0deg,#1a6fff,#4da6ff); border-radius:4px 4px 0 0; transition:height 0.5s; }
+.bar-label { font-size:10px; color:var(--texto-medio); margin-top:5px; text-align:center; }
+.bar-val { font-size:9px; color:var(--azul-neon); font-weight:700; margin-bottom:3px; }
 
-/* ===== KANBAN ===== */
+/* KANBAN */
 .kanban-board { display:flex; gap:14px; overflow-x:auto; padding-bottom:16px; }
-.kanban-col {
-  min-width:200px;
-  background:rgba(10,20,60,0.6);
-  border:1px solid var(--borda);
-  border-radius:12px; padding:12px; flex:1;
-}
+.kanban-col { min-width:200px; background:rgba(10,20,60,0.6); border:1px solid var(--borda); border-radius:12px; padding:12px; flex:1; }
 .kanban-col-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
 .kanban-col-title { font-size:13px; font-weight:700; color:var(--azul-neon); }
 .kanban-count { background:var(--azul-eletrico); color:white; border-radius:20px; padding:2px 8px; font-size:11px; font-weight:700; }
-.kanban-card {
-  background:rgba(15,30,80,0.9);
-  border:1px solid var(--borda);
-  border-radius:8px; padding:12px; margin-bottom:10px;
-  box-shadow:0 2px 10px rgba(0,0,0,0.3);
-  cursor:grab; border-left:3px solid var(--azul-eletrico);
-  transition:transform 0.2s, box-shadow 0.2s;
-}
-.kanban-card:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(26,111,255,0.2); }
+.kanban-card { background:rgba(15,30,80,0.9); border:1px solid var(--borda); border-radius:8px; padding:12px; margin-bottom:10px; cursor:grab; border-left:3px solid var(--azul-eletrico); transition:transform 0.2s; }
+.kanban-card:hover { transform:translateY(-2px); }
 .kanban-col.drag-over { background:rgba(26,111,255,0.1); border:2px dashed var(--azul-eletrico); }
 .card-nome { font-size:13px; font-weight:700; color:var(--branco); margin-bottom:4px; }
 .card-tel { font-size:11px; color:var(--texto-medio); margin-bottom:4px; }
 .card-valor { font-size:12px; color:#00cc44; font-weight:700; margin-bottom:4px; }
 .card-resp { font-size:11px; color:var(--texto-medio); }
 .card-actions { display:flex; gap:6px; margin-top:8px; }
-.kanban-add-btn {
-  width:100%; padding:8px;
-  background:transparent;
-  border:1px dashed var(--borda);
-  border-radius:6px; cursor:pointer;
-  font-size:12px; color:var(--texto-medio); margin-top:4px;
-  transition:all 0.2s;
-}
-.kanban-add-btn:hover { background:rgba(26,111,255,0.1); color:var(--azul-neon); border-color:var(--azul-eletrico); }
+.kanban-add-btn { width:100%; padding:8px; background:transparent; border:1px dashed var(--borda); border-radius:6px; cursor:pointer; font-size:12px; color:var(--texto-medio); margin-top:4px; }
+.kanban-add-btn:hover { background:rgba(26,111,255,0.1); color:var(--azul-neon); }
 
-/* ===== FUNIL ===== */
-.funil-box {
-  background:rgba(10,20,60,0.8);
-  border:1px solid var(--borda);
-  border-radius:12px; padding:22px; margin-bottom:20px;
-}
+/* FUNIL */
+.funil-box { background:rgba(10,20,60,0.8); border:1px solid var(--borda); border-radius:12px; padding:22px; margin-bottom:20px; }
 .funil-box h3 { color:var(--branco); font-size:15px; margin-bottom:16px; }
 .funil-steps { display:flex; gap:8px; align-items:flex-end; justify-content:center; }
 .funil-step { text-align:center; flex:1; }
@@ -254,40 +125,47 @@ tr:hover td { background:rgba(26,111,255,0.05); }
 .etapa-badge { padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; color:white; }
 
 /* MODAL */
-.modal-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:1000; display:none; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
+.modal-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:1000; display:none; align-items:center; justify-content:center; }
 .modal-overlay.show { display:flex; }
-.modal {
-  background:linear-gradient(135deg,#0a1428,#0d1f4e);
-  border:1px solid var(--borda);
-  border-radius:16px; padding:26px; width:100%; max-width:480px; max-height:90vh; overflow-y:auto;
-  box-shadow:0 20px 60px rgba(0,0,0,0.6);
-}
+.modal { background:linear-gradient(135deg,#0a1428,#0d1f4e); border:1px solid var(--borda); border-radius:16px; padding:26px; width:100%; max-width:480px; max-height:90vh; overflow-y:auto; }
 .modal h3 { font-size:16px; color:var(--azul-neon); margin-bottom:18px; }
 .modal-footer { display:flex; gap:10px; justify-content:flex-end; margin-top:18px; }
+
+/* LOADING */
+#loading { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(6,13,31,0.95); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.spinner { width:40px; height:40px; border:3px solid var(--borda); border-top-color:var(--azul-eletrico); border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:14px; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+.text-green { color:#00cc44; font-weight:700; }
+.text-red { color:#ff6b78; font-weight:700; }
+.hidden { display:none !important; }
 </style>
 </head>
 <body>
 
+<!-- LOADING -->
+<div id="loading">
+  <div class="spinner"></div>
+  <div style="color:var(--azul-neon);font-size:14px;">Conectando ao banco de dados...</div>
+</div>
+
 <!-- LOGIN -->
-<div id="login-screen">
+<div id="login-screen" style="display:none;">
   <div class="login-box">
-    <div style="text-align:center;margin-bottom:20px;">
-      <svg viewBox="0 0 400 70" width="260" xmlns="http://www.w3.org/2000/svg">
-        <!-- G -->
+    <div style="text-align:center;margin-bottom:24px;">
+      <svg viewBox="0 0 400 70" width="220" xmlns="http://www.w3.org/2000/svg">
         <path d="M8,10 Q8,4 14,4 L44,4 Q50,4 50,10 L50,18 L36,18 L36,14 L18,14 L18,56 L36,56 L36,42 L30,42 L30,32 L50,32 L50,60 Q50,66 44,66 L14,66 Q8,66 8,60 Z" fill="#e63946"/>
-        <!-- E -->
         <path d="M58,4 L100,4 Q106,4 106,10 L106,18 L72,18 L72,30 L98,30 L98,40 L72,40 L72,56 L106,56 L106,60 Q106,66 100,66 L58,66 Z" fill="#e63946"/>
-        <!-- X -->
         <path d="M114,4 L130,4 L143,24 L156,4 L172,4 L152,35 L173,66 L157,66 L143,46 L129,66 L113,66 L134,35 Z" fill="#e63946"/>
-        <!-- COMPANY -->
         <text x="188" y="48" font-family="'Helvetica Neue',Arial,sans-serif" font-size="22" font-weight="600" letter-spacing="3" fill="#FFFFFF">COMPANY</text>
       </svg>
+      <p style="color:var(--texto-medio);font-size:13px;margin-top:8px;">Sistema de Gestão de Consultoras</p>
     </div>
-    <p style="color:#888;font-size:13px;margin-bottom:24px;">Sistema de Gestão de Consultoras</p>
+    <div id="login-alert"></div>
     <div id="login-form">
       <div class="form-group"><label>Empresa</label><input type="text" id="login-empresa" placeholder="Nome da empresa" /></div>
       <div class="form-group"><label>Usuário</label><input type="text" id="login-user" placeholder="Seu usuário" /></div>
-      <div class="form-group"><label>Senha</label><input type="password" id="login-pass" placeholder="Sua senha" /></div>
+      <div class="form-group"><label>Senha</label><input type="password" id="login-pass" placeholder="Sua senha" onkeydown="if(event.key==='Enter')fazerLogin()" /></div>
       <button class="btn-primary" onclick="fazerLogin()">ENTRAR</button>
       <div class="login-toggle">Não tem conta? <span onclick="toggleCad()">Criar empresa</span></div>
     </div>
@@ -304,18 +182,14 @@ tr:hover td { background:rgba(26,111,255,0.05); }
 <!-- APP -->
 <div id="app">
   <div class="sidebar">
-    <div class="sidebar-logo" style="padding:16px 18px;border-bottom:1px solid #222;">
-      <svg viewBox="0 0 400 70" width="180" xmlns="http://www.w3.org/2000/svg">
-        <!-- G -->
+    <div style="padding:16px 18px;border-bottom:1px solid var(--borda);">
+      <svg viewBox="0 0 400 70" width="170" xmlns="http://www.w3.org/2000/svg">
         <path d="M8,10 Q8,4 14,4 L44,4 Q50,4 50,10 L50,18 L36,18 L36,14 L18,14 L18,56 L36,56 L36,42 L30,42 L30,32 L50,32 L50,60 Q50,66 44,66 L14,66 Q8,66 8,60 Z" fill="#e63946"/>
-        <!-- E -->
         <path d="M58,4 L100,4 Q106,4 106,10 L106,18 L72,18 L72,30 L98,30 L98,40 L72,40 L72,56 L106,56 L106,60 Q106,66 100,66 L58,66 Z" fill="#e63946"/>
-        <!-- X -->
         <path d="M114,4 L130,4 L143,24 L156,4 L172,4 L152,35 L173,66 L157,66 L143,46 L129,66 L113,66 L134,35 Z" fill="#e63946"/>
-        <!-- Espaço + COMPANY menor -->
-        <text x="188" y="48" font-family="'Helvetica Neue',Arial,sans-serif" font-size="22" font-weight="300" letter-spacing="3" fill="#ffffff">COMPANY</text>
+        <text x="188" y="48" font-family="'Helvetica Neue',Arial,sans-serif" font-size="22" font-weight="600" letter-spacing="3" fill="#FFFFFF">COMPANY</text>
       </svg>
-      <span id="empresa-nome" style="color:#555;font-size:11px;display:block;margin-top:4px;"></span>
+      <span id="empresa-nome" style="color:#555;font-size:11px;display:block;margin-top:6px;"></span>
     </div>
     <div class="sidebar-menu">
       <div class="menu-item active" onclick="irPara('dashboard')"><span class="icon">📊</span> Dashboard</div>
@@ -326,18 +200,13 @@ tr:hover td { background:rgba(26,111,255,0.05); }
       <div class="menu-item" onclick="irPara('comissoes')"><span class="icon">💰</span> Comissões</div>
       <div class="menu-item" onclick="irPara('regras')"><span class="icon">⚙️</span> Regras</div>
       <div class="menu-item" onclick="irPara('usuarios')"><span class="icon">🔐</span> Usuários</div>
-      <div class="menu-item" onclick="irPara('webhook')"><span class="icon">🔗</span> Webhooks</div>
-      <div class="menu-item" onclick="irPara('whatsapp')"><span class="icon">💬</span> WhatsApp</div>
     </div>
     <div class="sidebar-footer">
-      <div style="font-size:11px;color:#aaa;margin-bottom:8px;letter-spacing:0.5px;">🎨 TEMA</div>
+      <div style="font-size:11px;color:#aaa;margin-bottom:8px;">🎨 TEMA</div>
       <div style="display:flex;gap:6px;margin-bottom:10px;">
-        <button onclick="setTema('azul')" title="Azul escuro"
-          style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#060d1f,#0d1f4e);border:2px solid #1a6fff;cursor:pointer;"></button>
-        <button onclick="setTema('preto')" title="Preto"
-          style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#000,#1a1a1a);border:2px solid #444;cursor:pointer;"></button>
-        <button onclick="setTema('branco')" title="Branco"
-          style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#fff,#eee);border:2px solid #ccc;cursor:pointer;"></button>
+        <button onclick="setTema('azul')" title="Azul" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#060d1f,#0d1f4e);border:2px solid #1a6fff;cursor:pointer;"></button>
+        <button onclick="setTema('preto')" title="Preto" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#000,#1a1a1a);border:2px solid #444;cursor:pointer;"></button>
+        <button onclick="setTema('branco')" title="Branco" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#fff,#eee);border:2px solid #ccc;cursor:pointer;"></button>
       </div>
       <div id="user-logado" style="font-size:11px;color:#aaa;margin-bottom:5px;"></div>
       <button id="btn-voltar-master" class="btn-logout" style="display:none;background:#e63946;color:white;margin-bottom:6px;" onclick="voltarMaster()">👑 Voltar ao Master</button>
@@ -346,210 +215,6 @@ tr:hover td { background:rgba(26,111,255,0.05); }
   </div>
 
   <div class="main-content">
-
-    <!-- WEBHOOK -->
-    <div id="page-webhook" class="hidden">
-      <div class="page-header"><h2>🔗 Módulo Webhooks</h2><p>Integre o sistema com outras plataformas</p></div>
-
-      <!-- URL ENTRADA -->
-      <div class="regras-box">
-        <h3>📥 Webhook de Entrada (Receber dados externos)</h3>
-        <p style="font-size:13px;color:#666;margin-bottom:14px;">Use esta URL para enviar dados de outras plataformas (RD Station, HubSpot, Hotmart, etc.) para este sistema.</p>
-        <div style="background:#f4f4f4;padding:14px;border-radius:8px;border:1px solid #ddd;margin-bottom:14px;">
-          <div style="font-size:11px;color:#888;margin-bottom:4px;">URL DO WEBHOOK (copie e cole na plataforma externa):</div>
-          <div style="display:flex;gap:10px;align-items:center;">
-            <input type="text" id="webhook-url-entrada" readonly
-              style="flex:1;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:12px;background:white;font-family:monospace;"
-              value="https://seudominio.com/webhook/entrada" />
-            <button class="btn-success" onclick="copiarWebhook('webhook-url-entrada')">📋 Copiar</button>
-          </div>
-        </div>
-        <div style="background:#fff8e1;padding:12px;border-radius:8px;border:1px solid #ffe082;font-size:12px;color:#795548;">
-          ⚠️ <strong>Formato esperado (JSON):</strong><br>
-          <pre style="margin-top:8px;font-size:11px;background:#f5f5f5;padding:8px;border-radius:4px;">
-{
-  "nome": "João Silva",
-  "telefone": "21999999999",
-  "etapa": "Agendamento",
-  "consultora": "Maria",
-  "valor": 500.00,
-  "origem": "RD Station"
-}</pre>
-        </div>
-      </div>
-
-      <!-- WEBHOOKS CADASTRADOS -->
-      <div class="regras-box">
-        <h3>📤 Webhooks de Saída (Enviar dados para outras plataformas)</h3>
-        <p style="font-size:13px;color:#666;margin-bottom:14px;">Configure URLs externas para receber notificações quando eventos acontecerem neste sistema.</p>
-        <div class="form-grid" style="margin-bottom:14px;">
-          <div class="form-group">
-            <label>Nome do Webhook</label>
-            <input type="text" id="wh-nome" placeholder="Ex: Notificar RD Station" />
-          </div>
-          <div class="form-group">
-            <label>URL de Destino</label>
-            <input type="text" id="wh-url" placeholder="https://..." />
-          </div>
-          <div class="form-group">
-            <label>Evento Gatilho</label>
-            <select id="wh-evento">
-              <option value="novo_lead">Novo Lead cadastrado</option>
-              <option value="lead_movido">Lead movido de etapa</option>
-              <option value="novo_lancamento">Novo lançamento</option>
-              <option value="meta_atingida">Meta atingida</option>
-              <option value="todos">Todos os eventos</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Método</label>
-            <select id="wh-metodo">
-              <option value="POST">POST</option>
-              <option value="GET">GET</option>
-            </select>
-          </div>
-        </div>
-        <button class="btn-success" onclick="salvarWebhook()">+ ADICIONAR WEBHOOK</button>
-      </div>
-
-      <div class="table-box">
-        <div class="table-header"><h3>Webhooks Configurados</h3></div>
-        <table>
-          <thead><tr><th>Nome</th><th>URL</th><th>Evento</th><th>Método</th><th>Status</th><th>Último Disparo</th><th>Ação</th></tr></thead>
-          <tbody id="wh-body"></tbody>
-        </table>
-      </div>
-
-      <!-- LOGS -->
-      <div class="regras-box">
-        <h3>📋 Log de Disparos</h3>
-        <div id="wh-logs" style="background:#1a1a1a;padding:14px;border-radius:8px;font-family:monospace;font-size:12px;color:#2a9d8f;max-height:200px;overflow-y:auto;">
-          <div style="color:#666;">Nenhum disparo registrado ainda...</div>
-        </div>
-        <button class="btn-secondary" style="margin-top:10px;" onclick="testarWebhook()">🧪 Testar Webhook</button>
-        <button class="btn-danger" style="margin-top:10px;margin-left:8px;" onclick="limparLogs()">🗑️ Limpar Logs</button>
-      </div>
-    </div>
-
-    <!-- WHATSAPP -->
-    <div id="page-whatsapp" class="hidden">
-      <div class="page-header"><h2>💬 WhatsApp - Espelhamento</h2><p>Integre e espelhe conversas do WhatsApp</p></div>
-
-      <!-- STATUS CONEXÃO -->
-      <div class="cards-grid" style="grid-template-columns:repeat(3,1fr)">
-        <div class="card" style="border-top-color:#25D366;">
-          <div class="card-label">Status</div>
-          <div class="card-value" id="wa-status" style="color:#25D366;font-size:16px;">⚪ Desconectado</div>
-        </div>
-        <div class="card">
-          <div class="card-label">Mensagens Recebidas</div>
-          <div class="card-value" id="wa-recebidas">0</div>
-        </div>
-        <div class="card">
-          <div class="card-label">Leads Gerados</div>
-          <div class="card-value" id="wa-leads">0</div>
-        </div>
-      </div>
-
-      <!-- CONEXÃO QR CODE -->
-      <div class="regras-box">
-        <h3>📱 Conectar WhatsApp</h3>
-        <p style="font-size:13px;color:#666;margin-bottom:16px;">
-          Para espelhar o WhatsApp, você precisa de uma API de WhatsApp. Escolha uma das opções abaixo:
-        </p>
-        <div class="form-grid">
-          <div style="background:#f0f8f0;padding:16px;border-radius:10px;border:2px solid #25D366;">
-            <div style="font-weight:700;color:#128C7E;margin-bottom:8px;">🟢 OPÇÃO 1 - Evolution API (Grátis)</div>
-            <div style="font-size:12px;color:#555;margin-bottom:10px;">Self-hosted, código aberto. Ideal pra quem tem servidor.</div>
-            <div class="form-group"><label style="font-size:12px;">URL da API</label><input type="text" id="wa-evo-url" placeholder="http://seu-servidor:8080" /></div>
-            <div class="form-group"><label style="font-size:12px;">API Key</label><input type="text" id="wa-evo-key" placeholder="Sua API Key" /></div>
-            <button class="btn-success" style="width:100%;background:#25D366;" onclick="conectarEvolution()">📱 CONECTAR VIA EVOLUTION</button>
-          </div>
-          <div style="background:#f0f4ff;padding:16px;border-radius:10px;border:2px solid #4a90e2;">
-            <div style="font-weight:700;color:#4a90e2;margin-bottom:8px;">🔵 OPÇÃO 2 - Z-API (Pago)</div>
-            <div style="font-size:12px;color:#555;margin-bottom:10px;">Serviço gerenciado, mais estável. R$100-300/mês.</div>
-            <div class="form-group"><label style="font-size:12px;">Instance ID</label><input type="text" id="wa-zapi-id" placeholder="Seu Instance ID" /></div>
-            <div class="form-group"><label style="font-size:12px;">Token</label><input type="text" id="wa-zapi-token" placeholder="Seu Token" /></div>
-            <button class="btn-success" style="width:100%;background:#4a90e2;" onclick="conectarZAPI()">📱 CONECTAR VIA Z-API</button>
-          </div>
-        </div>
-
-        <!-- QR CODE -->
-        <div id="wa-qr-box" style="display:none;text-align:center;margin-top:20px;padding:20px;background:#f9f9f9;border-radius:10px;">
-          <p style="font-size:14px;font-weight:600;color:var(--azul);margin-bottom:12px;">📱 Escaneie o QR Code com seu WhatsApp:</p>
-          <div id="wa-qr" style="display:inline-block;padding:10px;background:white;border-radius:8px;border:2px solid #25D366;">
-            <div style="width:180px;height:180px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#888;">
-              QR Code aparece aqui após conectar sua API
-            </div>
-          </div>
-          <p style="font-size:12px;color:#888;margin-top:10px;">O QR Code expira em 60 segundos</p>
-        </div>
-      </div>
-
-      <!-- REGRAS DE AUTOMAÇÃO -->
-      <div class="regras-box">
-        <h3>🤖 Regras de Automação</h3>
-        <p style="font-size:13px;color:#666;margin-bottom:14px;">Defina o que acontece quando uma mensagem chegar pelo WhatsApp.</p>
-        <div class="form-grid" style="margin-bottom:14px;">
-          <div class="form-group">
-            <label>Palavra-chave</label>
-            <input type="text" id="wa-keyword" placeholder="Ex: quero agendar" />
-          </div>
-          <div class="form-group">
-            <label>Ação</label>
-            <select id="wa-acao">
-              <option value="criar_lead">Criar Lead automaticamente</option>
-              <option value="mover_etapa">Mover Lead de etapa</option>
-              <option value="notificar">Notificar consultora</option>
-              <option value="responder">Resposta automática</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Etapa do Lead</label>
-            <select id="wa-etapa-auto">
-              <option value="Agendamento">Agendamento</option>
-              <option value="Comparecimento">Comparecimento</option>
-              <option value="Apresentação">Apresentação</option>
-              <option value="Análise">Análise</option>
-              <option value="Fechamento">Fechamento</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Consultora Responsável</label>
-            <select id="wa-cons-auto"></select>
-          </div>
-          <div class="form-group" style="grid-column:span 2;">
-            <label>Mensagem de Resposta Automática</label>
-            <input type="text" id="wa-resposta" placeholder="Ex: Olá! Recebemos sua mensagem. Em breve entraremos em contato!" />
-          </div>
-        </div>
-        <button class="btn-success" onclick="salvarRegraWA()">+ ADICIONAR REGRA</button>
-      </div>
-
-      <!-- REGRAS CADASTRADAS -->
-      <div class="table-box">
-        <div class="table-header"><h3>Regras de Automação</h3></div>
-        <table>
-          <thead><tr><th>Palavra-chave</th><th>Ação</th><th>Etapa</th><th>Consultora</th><th>Resposta</th><th>Ação</th></tr></thead>
-          <tbody id="wa-regras-body"></tbody>
-        </table>
-      </div>
-
-      <!-- CONVERSAS ESPELHADAS -->
-      <div class="regras-box">
-        <h3>📨 Conversas Espelhadas (Tempo Real)</h3>
-        <p style="font-size:13px;color:#666;margin-bottom:14px;">Mensagens recebidas pelo WhatsApp aparecem aqui automaticamente.</p>
-        <div id="wa-conversas" style="background:#ECE5DD;padding:14px;border-radius:10px;max-height:300px;overflow-y:auto;">
-          <div style="text-align:center;color:#888;font-size:13px;padding:20px;">
-            💬 Nenhuma mensagem ainda. Conecte o WhatsApp para começar.
-          </div>
-        </div>
-        <div style="display:flex;gap:10px;margin-top:10px;">
-          <input type="text" id="wa-msg-teste" placeholder="Simular mensagem recebida..." style="flex:1;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px;" />
-          <button class="btn-success" style="background:#25D366;" onclick="simularMensagem()">📨 Simular</button>
-        </div>
-      </div>
-    </div>
 
     <!-- MASTER PANEL -->
     <div id="master-panel" class="hidden">
@@ -560,7 +225,7 @@ tr:hover td { background:rgba(26,111,255,0.05); }
     <div id="page-dashboard">
       <div class="page-header"><h2>📊 Dashboard</h2><p>Visão geral do desempenho</p></div>
       <div class="filter-bar">
-        <label style="font-size:13px;font-weight:600;">Período:</label>
+        <label style="font-size:13px;font-weight:600;color:var(--texto-claro);">Período:</label>
         <select id="dash-mes" onchange="atualizarDashboard()"></select>
       </div>
       <div class="cards-grid">
@@ -575,10 +240,7 @@ tr:hover td { background:rgba(26,111,255,0.05); }
         <div class="card"><div class="card-label">Fechamentos</div><div class="card-value" id="card-fech">0</div></div>
         <div class="card"><div class="card-label">Leads no CRM</div><div class="card-value" id="card-leads">0</div></div>
       </div>
-      <div class="chart-box">
-        <h3>Receita por Consultora</h3>
-        <div class="bar-chart" id="grafico-consultoras"></div>
-      </div>
+      <div class="chart-box"><h3>Receita por Consultora</h3><div class="bar-chart" id="grafico-consultoras"></div></div>
       <div class="table-box">
         <div class="table-header"><h3>Ranking de Consultoras</h3></div>
         <table><thead><tr><th>#</th><th>Consultora</th><th>Receita</th><th>Meta</th><th>% Meta</th><th>Comissão</th><th>Cutoff</th></tr></thead>
@@ -591,9 +253,7 @@ tr:hover td { background:rgba(26,111,255,0.05); }
       <div class="page-header"><h2>🗂️ CRM Kanban</h2><p>Gerencie seus leads por etapa</p></div>
       <div class="filter-bar">
         <button class="btn-success" onclick="abrirModalLead()">+ Novo Lead</button>
-        <select id="kanban-filter-cons" onchange="renderKanban()">
-          <option value="">Todas as consultoras</option>
-        </select>
+        <select id="kanban-filter-cons" onchange="renderKanban()"><option value="">Todas as consultoras</option></select>
       </div>
       <div class="kanban-board" id="kanban-board"></div>
     </div>
@@ -602,17 +262,10 @@ tr:hover td { background:rgba(26,111,255,0.05); }
     <div id="page-funil" class="hidden">
       <div class="page-header"><h2>🔻 Funil de Vendas</h2><p>Acompanhe a conversão em cada etapa</p></div>
       <div class="filter-bar">
-        <label style="font-size:13px;font-weight:600;">Consultora:</label>
-        <select id="funil-cons" onchange="renderFunil()">
-          <option value="">Todas</option>
-        </select>
-        <label style="font-size:13px;font-weight:600;">Período:</label>
+        <select id="funil-cons" onchange="renderFunil()"><option value="">Todas</option></select>
         <select id="funil-mes" onchange="renderFunil()"></select>
       </div>
-      <div class="funil-box">
-        <h3>Visão do Funil</h3>
-        <div class="funil-steps" id="funil-visual"></div>
-      </div>
+      <div class="funil-box"><h3>Visão do Funil</h3><div class="funil-steps" id="funil-visual"></div></div>
       <div class="table-box">
         <div class="table-header"><h3>Leads por Etapa</h3></div>
         <table><thead><tr><th>Nome</th><th>Telefone</th><th>Consultora</th><th>Etapa</th><th>Valor</th><th>Obs.</th><th>Ação</th></tr></thead>
@@ -627,14 +280,14 @@ tr:hover td { background:rgba(26,111,255,0.05); }
         <div class="table-header"><h3>Novo Lançamento</h3></div>
         <div style="padding:18px;">
           <div class="form-grid">
-            <div class="form-group"><label>Data</label><input type="date" id="lanc-data" /></div>
-            <div class="form-group"><label>Consultora</label><select id="lanc-consultora"></select></div>
-            <div class="form-group"><label>Agendamentos</label><input type="number" id="lanc-agend" placeholder="0" min="0" /></div>
-            <div class="form-group"><label>Comparecimentos</label><input type="number" id="lanc-comp" placeholder="0" min="0" /></div>
-            <div class="form-group"><label>Fechamentos</label><input type="number" id="lanc-fech" placeholder="0" min="0" /></div>
-            <div class="form-group"><label>Receita Show Recorrente (R$)</label><input type="number" id="lanc-show" placeholder="0.00" step="0.01" min="0" /></div>
-            <div class="form-group"><label>Receita Recorrente (R$)</label><input type="number" id="lanc-rec" placeholder="0.00" step="0.01" min="0" /></div>
-            <div class="form-group"><label>Observação</label><input type="text" id="lanc-obs" placeholder="Opcional" /></div>
+            <div class="form-group"><label style="color:var(--texto-claro);">Data</label><input type="date" id="lanc-data" /></div>
+            <div class="form-group"><label style="color:var(--texto-claro);">Consultora</label><select id="lanc-consultora"></select></div>
+            <div class="form-group"><label style="color:var(--texto-claro);">Agendamentos</label><input type="number" id="lanc-agend" placeholder="0" min="0" /></div>
+            <div class="form-group"><label style="color:var(--texto-claro);">Comparecimentos</label><input type="number" id="lanc-comp" placeholder="0" min="0" /></div>
+            <div class="form-group"><label style="color:var(--texto-claro);">Fechamentos</label><input type="number" id="lanc-fech" placeholder="0" min="0" /></div>
+            <div class="form-group"><label style="color:var(--texto-claro);">Receita Show Recorrente (R$)</label><input type="number" id="lanc-show" placeholder="0.00" step="0.01" /></div>
+            <div class="form-group"><label style="color:var(--texto-claro);">Receita Recorrente (R$)</label><input type="number" id="lanc-rec" placeholder="0.00" step="0.01" /></div>
+            <div class="form-group"><label style="color:var(--texto-claro);">Observação</label><input type="text" id="lanc-obs" placeholder="Opcional" /></div>
           </div>
           <button class="btn-success" onclick="salvarLancamento()">+ SALVAR LANÇAMENTO</button>
         </div>
@@ -645,7 +298,7 @@ tr:hover td { background:rgba(26,111,255,0.05); }
       </div>
       <div class="table-box">
         <div class="table-header"><h3>Histórico</h3></div>
-        <table><thead><tr><th>Data</th><th>Mês</th><th>Consultora</th><th>Agend.</th><th>Compar.</th><th>Fecha.</th><th>Show Rec.</th><th>Recorrente</th><th>Total</th><th>Obs.</th><th>Ação</th></tr></thead>
+        <table><thead><tr><th>Data</th><th>Consultora</th><th>Agend.</th><th>Compar.</th><th>Fecha.</th><th>Show Rec.</th><th>Recorrente</th><th>Total</th><th>Obs.</th><th>Ação</th></tr></thead>
         <tbody id="lanc-body"></tbody></table>
       </div>
     </div>
@@ -657,10 +310,10 @@ tr:hover td { background:rgba(26,111,255,0.05); }
         <div class="table-header"><h3>Nova Consultora</h3></div>
         <div style="padding:18px;">
           <div class="form-grid">
-            <div class="form-group"><label>Nome</label><input type="text" id="cons-nome" placeholder="Nome completo" /></div>
-            <div class="form-group"><label>Meta Mensal (R$)</label><input type="number" id="cons-meta" placeholder="0.00" step="0.01" /></div>
-            <div class="form-group"><label>Status</label><select id="cons-status"><option>Ativa</option><option>Inativa</option></select></div>
-            <div class="form-group"><label>Observação</label><input type="text" id="cons-obs" placeholder="Opcional" /></div>
+            <div class="form-group"><label style="color:var(--texto-claro);">Nome</label><input type="text" id="cons-nome" placeholder="Nome completo" /></div>
+            <div class="form-group"><label style="color:var(--texto-claro);">Meta Mensal (R$)</label><input type="number" id="cons-meta" placeholder="0.00" step="0.01" /></div>
+            <div class="form-group"><label style="color:var(--texto-claro);">Status</label><select id="cons-status"><option>Ativa</option><option>Inativa</option></select></div>
+            <div class="form-group"><label style="color:var(--texto-claro);">Observação</label><input type="text" id="cons-obs" placeholder="Opcional" /></div>
           </div>
           <button class="btn-success" onclick="salvarConsultora()">+ ADICIONAR CONSULTORA</button>
         </div>
@@ -676,7 +329,6 @@ tr:hover td { background:rgba(26,111,255,0.05); }
     <div id="page-comissoes" class="hidden">
       <div class="page-header"><h2>💰 Comissões</h2><p>Cálculo automático</p></div>
       <div class="filter-bar">
-        <label style="font-size:13px;font-weight:600;">Período:</label>
         <select id="com-mes" onchange="renderComissoes()"></select>
       </div>
       <div class="table-box">
@@ -691,21 +343,19 @@ tr:hover td { background:rgba(26,111,255,0.05); }
       <div class="page-header"><h2>⚙️ Regras de Comissionamento</h2></div>
       <div class="regras-box">
         <h3>Configurações Gerais</h3>
-        <div class="regra-row"><label>Cutoff mínimo (R$)</label><input type="number" id="cutoff" value="30000" step="100" /></div>
-        <div class="regra-row"><label>% Base Show Recorrente</label><input type="number" id="base-show" value="4.00" step="0.1" /></div>
-        <div class="regra-row"><label>% Base Recorrente</label><input type="number" id="base-rec" value="1.50" step="0.1" /></div>
+        <div class="regra-row"><label style="color:var(--texto-claro);">Cutoff mínimo (R$)</label><input type="number" id="cutoff" value="30000" step="100" /></div>
+        <div class="regra-row"><label style="color:var(--texto-claro);">% Base Show Recorrente</label><input type="number" id="base-show" value="4.00" step="0.1" /></div>
+        <div class="regra-row"><label style="color:var(--texto-claro);">% Base Recorrente</label><input type="number" id="base-rec" value="1.50" step="0.1" /></div>
       </div>
       <div class="regras-box">
         <h3>Escala por Batimento de Meta</h3>
         <table style="width:100%;border-collapse:collapse;">
-          <thead style="background:var(--preto);color:white;">
-            <tr><th style="padding:10px;font-size:12px;">% Mínimo</th><th style="padding:10px;font-size:12px;">Faixa</th><th style="padding:10px;font-size:12px;">% Show Rec.</th><th style="padding:10px;font-size:12px;">% Recorrente</th></tr>
-          </thead>
+          <thead style="background:var(--preto);color:white;"><tr><th style="padding:10px;font-size:12px;">% Mínimo</th><th style="padding:10px;font-size:12px;">Faixa</th><th style="padding:10px;font-size:12px;">% Show Rec.</th><th style="padding:10px;font-size:12px;">% Recorrente</th></tr></thead>
           <tbody id="regras-body">
-            <tr><td style="padding:10px;font-size:13px;">0%</td><td style="padding:10px;font-size:13px;">Até 119,99%</td><td style="padding:10px;"><input type="number" value="1.60" step="0.1" style="width:70px;padding:6px;border:1px solid #ddd;border-radius:4px;" /></td><td style="padding:10px;"><input type="number" value="1.05" step="0.1" style="width:70px;padding:6px;border:1px solid #ddd;border-radius:4px;" /></td></tr>
-            <tr><td style="padding:10px;font-size:13px;">120%</td><td style="padding:10px;font-size:13px;">120% a 129,99%</td><td style="padding:10px;"><input type="number" value="1.70" step="0.1" style="width:70px;padding:6px;border:1px solid #ddd;border-radius:4px;" /></td><td style="padding:10px;"><input type="number" value="1.10" step="0.1" style="width:70px;padding:6px;border:1px solid #ddd;border-radius:4px;" /></td></tr>
-            <tr><td style="padding:10px;font-size:13px;">130%</td><td style="padding:10px;font-size:13px;">130% a 134,99%</td><td style="padding:10px;"><input type="number" value="1.80" step="0.1" style="width:70px;padding:6px;border:1px solid #ddd;border-radius:4px;" /></td><td style="padding:10px;"><input type="number" value="1.20" step="0.1" style="width:70px;padding:6px;border:1px solid #ddd;border-radius:4px;" /></td></tr>
-            <tr><td style="padding:10px;font-size:13px;">135%</td><td style="padding:10px;font-size:13px;">135% ou mais</td><td style="padding:10px;"><input type="number" value="1.90" step="0.1" style="width:70px;padding:6px;border:1px solid #ddd;border-radius:4px;" /></td><td style="padding:10px;"><input type="number" value="1.30" step="0.1" style="width:70px;padding:6px;border:1px solid #ddd;border-radius:4px;" /></td></tr>
+            <tr><td style="padding:10px;font-size:13px;color:var(--texto-claro);">0%</td><td style="padding:10px;font-size:13px;color:var(--texto-claro);">Até 119,99%</td><td style="padding:10px;"><input type="number" value="1.60" step="0.1" style="width:70px;padding:6px;border:1px solid var(--borda);border-radius:4px;background:rgba(255,255,255,0.05);color:white;" /></td><td style="padding:10px;"><input type="number" value="1.05" step="0.1" style="width:70px;padding:6px;border:1px solid var(--borda);border-radius:4px;background:rgba(255,255,255,0.05);color:white;" /></td></tr>
+            <tr><td style="padding:10px;font-size:13px;color:var(--texto-claro);">120%</td><td style="padding:10px;font-size:13px;color:var(--texto-claro);">120% a 129,99%</td><td style="padding:10px;"><input type="number" value="1.70" step="0.1" style="width:70px;padding:6px;border:1px solid var(--borda);border-radius:4px;background:rgba(255,255,255,0.05);color:white;" /></td><td style="padding:10px;"><input type="number" value="1.10" step="0.1" style="width:70px;padding:6px;border:1px solid var(--borda);border-radius:4px;background:rgba(255,255,255,0.05);color:white;" /></td></tr>
+            <tr><td style="padding:10px;font-size:13px;color:var(--texto-claro);">130%</td><td style="padding:10px;font-size:13px;color:var(--texto-claro);">130% a 134,99%</td><td style="padding:10px;"><input type="number" value="1.80" step="0.1" style="width:70px;padding:6px;border:1px solid var(--borda);border-radius:4px;background:rgba(255,255,255,0.05);color:white;" /></td><td style="padding:10px;"><input type="number" value="1.20" step="0.1" style="width:70px;padding:6px;border:1px solid var(--borda);border-radius:4px;background:rgba(255,255,255,0.05);color:white;" /></td></tr>
+            <tr><td style="padding:10px;font-size:13px;color:var(--texto-claro);">135%</td><td style="padding:10px;font-size:13px;color:var(--texto-claro);">135% ou mais</td><td style="padding:10px;"><input type="number" value="1.90" step="0.1" style="width:70px;padding:6px;border:1px solid var(--borda);border-radius:4px;background:rgba(255,255,255,0.05);color:white;" /></td><td style="padding:10px;"><input type="number" value="1.30" step="0.1" style="width:70px;padding:6px;border:1px solid var(--borda);border-radius:4px;background:rgba(255,255,255,0.05);color:white;" /></td></tr>
           </tbody>
         </table>
         <div style="margin-top:14px;"><button class="btn-success" onclick="salvarRegras()">💾 SALVAR REGRAS</button></div>
@@ -719,9 +369,9 @@ tr:hover td { background:rgba(26,111,255,0.05); }
         <div class="table-header"><h3>Novo Usuário</h3></div>
         <div style="padding:18px;">
           <div class="form-grid">
-            <div class="form-group"><label>Usuário</label><input type="text" id="usr-nome" placeholder="Ex: gerente01" /></div>
-            <div class="form-group"><label>Senha</label><input type="password" id="usr-pass" placeholder="Senha" /></div>
-            <div class="form-group"><label>Perfil</label><select id="usr-perfil"><option value="admin">Admin</option><option value="gerente">Gerente</option><option value="visualizador">Visualizador</option></select></div>
+            <div class="form-group"><label style="color:var(--texto-claro);">Usuário</label><input type="text" id="usr-nome" placeholder="Ex: gerente01" /></div>
+            <div class="form-group"><label style="color:var(--texto-claro);">Senha</label><input type="password" id="usr-pass" placeholder="Senha" /></div>
+            <div class="form-group"><label style="color:var(--texto-claro);">Perfil</label><select id="usr-perfil"><option value="admin">Admin</option><option value="gerente">Gerente</option><option value="visualizador">Visualizador</option></select></div>
           </div>
           <button class="btn-success" onclick="salvarUsuario()">+ ADICIONAR USUÁRIO</button>
         </div>
@@ -741,10 +391,10 @@ tr:hover td { background:rgba(26,111,255,0.05); }
   <div class="modal">
     <h3 id="modal-lead-title">+ Novo Lead</h3>
     <input type="hidden" id="lead-id" />
-    <div class="form-group"><label>Nome</label><input type="text" id="lead-nome" placeholder="Nome do lead" /></div>
-    <div class="form-group"><label>Telefone</label><input type="text" id="lead-tel" placeholder="(21) 99999-9999" /></div>
-    <div class="form-group"><label>Consultora Responsável</label><select id="lead-cons"></select></div>
-    <div class="form-group"><label>Etapa</label>
+    <div class="form-group"><label style="color:var(--texto-claro);">Nome</label><input type="text" id="lead-nome" placeholder="Nome do lead" /></div>
+    <div class="form-group"><label style="color:var(--texto-claro);">Telefone</label><input type="text" id="lead-tel" placeholder="(21) 99999-9999" /></div>
+    <div class="form-group"><label style="color:var(--texto-claro);">Consultora</label><select id="lead-cons"></select></div>
+    <div class="form-group"><label style="color:var(--texto-claro);">Etapa</label>
       <select id="lead-etapa">
         <option value="Agendamento">📅 Agendamento</option>
         <option value="Comparecimento">👣 Comparecimento</option>
@@ -753,8 +403,8 @@ tr:hover td { background:rgba(26,111,255,0.05); }
         <option value="Fechamento">✅ Fechamento</option>
       </select>
     </div>
-    <div class="form-group"><label>Valor Potencial (R$)</label><input type="number" id="lead-valor" placeholder="0.00" step="0.01" /></div>
-    <div class="form-group"><label>Observação</label><input type="text" id="lead-obs" placeholder="Opcional" /></div>
+    <div class="form-group"><label style="color:var(--texto-claro);">Valor Potencial (R$)</label><input type="number" id="lead-valor" placeholder="0.00" step="0.01" /></div>
+    <div class="form-group"><label style="color:var(--texto-claro);">Observação</label><input type="text" id="lead-obs" placeholder="Opcional" /></div>
     <div class="modal-footer">
       <button class="btn-secondary" onclick="fecharModal('modal-lead')">Cancelar</button>
       <button class="btn-success" onclick="salvarLead()">SALVAR</button>
@@ -763,285 +413,227 @@ tr:hover td { background:rgba(26,111,255,0.05); }
 </div>
 
 <script>
+// ========== FIREBASE CONFIG ==========
+const firebaseConfig = {
+  apiKey: "AIzaSyDVZLF3cnBCXetRh8mRpQ36tdFo-u0We1E",
+  authDomain: "gestao-pro-c17c1.firebaseapp.com",
+  projectId: "gestao-pro-c17c1",
+  storageBucket: "gestao-pro-c17c1.firebasestorage.app",
+  messagingSenderId: "650122144964",
+  appId: "1:650122144964:web:098a2b3af0f12b19dd6d91",
+  measurementId: "G-M3RWJ3FV0B"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
 // ========== ESTADO ==========
-let state = { empresaAtual:null, usuarioLogado:null };
+let state = { empresaAtual: null, usuarioLogado: null };
+const MASTER = { usuario: 'master', senha: 'gex@master2026' };
 const MESES = ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 const ETAPAS = ['Agendamento','Comparecimento','Apresentação','Análise','Fechamento'];
 const ETAPA_CORES = { 'Agendamento':'#3498db','Comparecimento':'#9b59b6','Apresentação':'#e67e22','Análise':'#e74c3c','Fechamento':'#2ecc71' };
 
-// ========== STORAGE ==========
-function getD() {
-  const e = JSON.parse(localStorage.getItem('empresas')||'{}');
-  return e[state.empresaAtual] || { consultoras:[], lancamentos:[], leads:[], usuarios:[], regras:regrasDefault() };
+// ========== FIRESTORE HELPERS ==========
+async function getEmpresa(k) {
+  const doc = await db.collection('empresas').doc(k).get();
+  return doc.exists ? doc.data() : null;
 }
-function saveD(d) {
-  const e = JSON.parse(localStorage.getItem('empresas')||'{}');
-  e[state.empresaAtual] = d; localStorage.setItem('empresas', JSON.stringify(e));
+async function saveEmpresa(k, data) {
+  await db.collection('empresas').doc(k).set(data, { merge: true });
+}
+async function getD() {
+  const d = await getEmpresa(state.empresaAtual);
+  return d || { consultoras:[], lancamentos:[], leads:[], usuarios:[], regras: regrasDefault() };
+}
+async function saveD(d) {
+  await saveEmpresa(state.empresaAtual, d);
 }
 function regrasDefault() {
   return { cutoff:30000, baseShow:4.0, baseRec:1.5, escala:[
-    {min:0, show:1.60, rec:1.05},{min:120, show:1.70, rec:1.10},
-    {min:130, show:1.80, rec:1.20},{min:135, show:1.90, rec:1.30}
+    {min:0,show:1.60,rec:1.05},{min:120,show:1.70,rec:1.10},
+    {min:130,show:1.80,rec:1.20},{min:135,show:1.90,rec:1.30}
   ]};
 }
 
-// ========== TEMA ==========
-function setTema(tema) {
-  const r = document.documentElement.style;
-  if (tema === 'azul') {
-    r.setProperty('--preto','#060d1f');
-    r.setProperty('--azul-escuro','#0a1428');
-    r.setProperty('--azul','#0d1f4e');
-    r.setProperty('--azul-medio','#1a3a7a');
-    r.setProperty('--borda','#1e3060');
-    r.setProperty('--cinza','#0f1e40');
-    r.setProperty('--texto-claro','#c8d8ff');
-    r.setProperty('--texto-medio','#7a99cc');
-    document.body.style.background='#0a1428';
-    document.querySelectorAll('.sidebar').forEach(el=>el.style.background='linear-gradient(180deg,#060d1f 0%,#0a1428 100%)');
-    document.querySelectorAll('.table-box').forEach(el=>el.style.background='rgba(10,20,60,0.8)');
-    document.querySelectorAll('.regras-box,.funil-box,.chart-box').forEach(el=>el.style.background='rgba(10,20,60,0.8)');
-    document.querySelectorAll('.card').forEach(el=>el.style.background='linear-gradient(135deg,rgba(10,20,60,0.9),rgba(15,30,80,0.9))');
-    document.querySelectorAll('td').forEach(el=>el.style.color='#c8d8ff');
-    document.querySelectorAll('.menu-item').forEach(el=>el.style.color='#7a99cc');
-    document.querySelectorAll('.page-header h2').forEach(el=>el.style.color='#ffffff');
-    document.querySelectorAll('.card-value').forEach(el=>el.style.color='#ffffff');
-  } else if (tema === 'preto') {
-    r.setProperty('--preto','#000000');
-    r.setProperty('--azul-escuro','#0a0a0a');
-    r.setProperty('--azul','#111111');
-    r.setProperty('--azul-medio','#222222');
-    r.setProperty('--borda','#333333');
-    r.setProperty('--cinza','#1a1a1a');
-    r.setProperty('--texto-claro','#dddddd');
-    r.setProperty('--texto-medio','#888888');
-    document.body.style.background='#0a0a0a';
-    document.querySelectorAll('.sidebar').forEach(el=>el.style.background='linear-gradient(180deg,#000 0%,#111 100%)');
-    document.querySelectorAll('.table-box').forEach(el=>el.style.background='rgba(10,10,10,0.95)');
-    document.querySelectorAll('.regras-box,.funil-box,.chart-box').forEach(el=>el.style.background='rgba(15,15,15,0.95)');
-    document.querySelectorAll('.card').forEach(el=>el.style.background='linear-gradient(135deg,#111,#1a1a1a)');
-    document.querySelectorAll('td').forEach(el=>el.style.color='#dddddd');
-    document.querySelectorAll('.menu-item').forEach(el=>el.style.color='#888888');
-    document.querySelectorAll('.page-header h2').forEach(el=>el.style.color='#ffffff');
-    document.querySelectorAll('.card-value').forEach(el=>el.style.color='#ffffff');
-  } else if (tema === 'branco') {
-    r.setProperty('--preto','#0d0d0d');
-    r.setProperty('--azul-escuro','#f4f4f4');
-    r.setProperty('--azul','#e8e8e8');
-    r.setProperty('--azul-medio','#d0d0d0');
-    r.setProperty('--borda','#cccccc');
-    r.setProperty('--cinza','#f9f9f9');
-    r.setProperty('--texto-claro','#333333');
-    r.setProperty('--texto-medio','#666666');
-    document.body.style.background='#f4f4f4';
-    document.querySelectorAll('.sidebar').forEach(el=>el.style.background='linear-gradient(180deg,#1a2b4a 0%,#0d1f4e 100%)');
-    document.querySelectorAll('.table-box').forEach(el=>el.style.background='#ffffff');
-    document.querySelectorAll('.regras-box,.funil-box,.chart-box').forEach(el=>el.style.background='#ffffff');
-    document.querySelectorAll('.card').forEach(el=>el.style.background='#ffffff');
-    document.querySelectorAll('td').forEach(el=>el.style.color='#333333');
-    document.querySelectorAll('.menu-item').forEach(el=>el.style.color='#aaaaaa');
-    document.querySelectorAll('.page-header h2').forEach(el=>el.style.color='#1a2b4a');
-    document.querySelectorAll('.card-value').forEach(el=>el.style.color='#1a2b4a');
-    document.querySelectorAll('.filter-bar').forEach(el=>{ el.style.background='#ffffff'; el.style.border='1px solid #ccc'; });
-    document.querySelectorAll('.filter-bar input,.filter-bar select').forEach(el=>{ el.style.background='#f9f9f9'; el.style.color='#333'; });
-  }
-  localStorage.setItem('tema', tema);
+// ========== UTILS ==========
+function fmt(v) { return 'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtK(v) { return v>=1000?'R$'+(v/1000).toFixed(1)+'k':'R$'+v.toFixed(0); }
+function abrirModal(id) { document.getElementById(id).classList.add('show'); }
+function fecharModal(id) { document.getElementById(id).classList.remove('show'); }
+function showAlert(msg, tipo='error') {
+  const el = document.getElementById('login-alert');
+  el.innerHTML = `<div class="alert alert-${tipo}">${msg}</div>`;
+  setTimeout(()=>el.innerHTML='', 4000);
 }
-function carregarTema() {
-  const t = localStorage.getItem('tema') || 'azul';
-  setTema(t);
+function loading(show) {
+  document.getElementById('loading').style.display = show ? 'flex' : 'none';
 }
-
-// ========== MASTER CONFIG ==========
-const MASTER = { usuario: 'master', senha: 'gex@master2026' };
 
 // ========== AUTH ==========
 function toggleCad() {
   document.getElementById('login-form').classList.toggle('hidden');
   document.getElementById('cad-form').classList.toggle('hidden');
 }
-function cadastrarEmpresa() {
-  const emp=document.getElementById('cad-empresa').value.trim();
-  const usr=document.getElementById('cad-user').value.trim();
-  const pass=document.getElementById('cad-pass').value.trim();
-  if(!emp||!usr||!pass) return alert('Preencha tudo!');
-  const e=JSON.parse(localStorage.getItem('empresas')||'{}');
-  const k=emp.toLowerCase().replace(/\s+/g,'_');
-  if(e[k]) return alert('Empresa já existe!');
-  e[k]={nomeEmpresa:emp,consultoras:[],lancamentos:[],leads:[],regras:regrasDefault(),usuarios:[{nome:usr,senha:pass,perfil:'admin'}]};
-  localStorage.setItem('empresas',JSON.stringify(e));
-  alert('Empresa criada! Faça login.'); toggleCad();
+async function cadastrarEmpresa() {
+  const emp = document.getElementById('cad-empresa').value.trim();
+  const usr = document.getElementById('cad-user').value.trim();
+  const pass = document.getElementById('cad-pass').value.trim();
+  if (!emp||!usr||!pass) return showAlert('Preencha todos os campos!');
+  loading(true);
+  try {
+    const k = emp.toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,'');
+    const existe = await getEmpresa(k);
+    if (existe) { loading(false); return showAlert('Empresa já existe!'); }
+    await saveEmpresa(k, {
+      nomeEmpresa: emp, consultoras:[], lancamentos:[], leads:[],
+      regras: regrasDefault(), usuarios:[{nome:usr, senha:pass, perfil:'admin'}]
+    });
+    loading(false);
+    showAlert('✅ Empresa criada! Faça login.','success');
+    toggleCad();
+    document.getElementById('cad-empresa').value='';
+    document.getElementById('cad-user').value='';
+    document.getElementById('cad-pass').value='';
+  } catch(e) { loading(false); showAlert('Erro: '+e.message); }
 }
-function fazerLogin() {
-  const emp=document.getElementById('login-empresa').value.trim();
-  const usr=document.getElementById('login-user').value.trim();
-  const pass=document.getElementById('login-pass').value.trim();
-  if(!emp||!usr||!pass) return alert('Preencha tudo!');
+async function fazerLogin() {
+  const emp = document.getElementById('login-empresa').value.trim();
+  const usr = document.getElementById('login-user').value.trim();
+  const pass = document.getElementById('login-pass').value.trim();
+  if (!emp||!usr||!pass) return showAlert('Preencha todos os campos!');
 
-  // LOGIN MASTER
-  if(usr===MASTER.usuario && pass===MASTER.senha) {
-    state.empresaAtual='__master__';
-    state.usuarioLogado={nome:'Master',perfil:'master'};
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('app').style.display='block';
-    document.getElementById('empresa-nome').textContent='Painel Master';
-    document.getElementById('user-logado').textContent='👑 Master Admin';
+  // MASTER LOGIN
+  if (usr === MASTER.usuario && pass === MASTER.senha) {
+    state.empresaAtual = '__master__';
+    state.usuarioLogado = {nome:'Master', perfil:'master'};
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('empresa-nome').textContent = 'Painel Master';
+    document.getElementById('user-logado').textContent = '👑 Master Admin';
     renderMaster();
     return;
   }
 
-  const e=JSON.parse(localStorage.getItem('empresas')||'{}');
-  const k=emp.toLowerCase().replace(/\s+/g,'_');
-  const empresa=e[k]; if(!empresa) return alert('Empresa não encontrada!');
-  const user=empresa.usuarios.find(u=>u.nome===usr&&u.senha===pass);
-  if(!user) return alert('Usuário ou senha inválidos!');
-  state.empresaAtual=k; state.usuarioLogado=user;
-  document.getElementById('empresa-nome').textContent=empresa.nomeEmpresa;
-  document.getElementById('user-logado').textContent='👤 '+user.nome+' ('+user.perfil+')';
-  document.getElementById('login-screen').style.display='none';
-  document.getElementById('app').style.display='block';
-  carregarTema();
-  popularSelects(); irPara('dashboard');
+  loading(true);
+  try {
+    const k = emp.toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,'');
+    const empresa = await getEmpresa(k);
+    if (!empresa) { loading(false); return showAlert('Empresa não encontrada!'); }
+    const user = (empresa.usuarios||[]).find(u=>u.nome===usr&&u.senha===pass);
+    if (!user) { loading(false); return showAlert('Usuário ou senha inválidos!'); }
+    state.empresaAtual = k;
+    state.usuarioLogado = user;
+    document.getElementById('empresa-nome').textContent = empresa.nomeEmpresa;
+    document.getElementById('user-logado').textContent = '👤 '+user.nome+' ('+user.perfil+')';
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    loading(false);
+    popularSelects();
+    irPara('dashboard');
+  } catch(e) { loading(false); showAlert('Erro: '+e.message); }
 }
 function fazerLogout() {
-  state={empresaAtual:null,usuarioLogado:null};
-  document.getElementById('login-screen').style.display='flex';
-  document.getElementById('app').style.display='none';
-  // Limpa painel master se estava aberto
+  state = { empresaAtual:null, usuarioLogado:null };
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
   document.getElementById('master-panel').classList.add('hidden');
-  document.getElementById('page-dashboard').classList.remove('hidden');
 }
 
-// ========== MASTER PANEL ==========
-function renderMaster() {
-  // Esconde menu normal e mostra painel master
+// ========== MASTER ==========
+async function renderMaster() {
   document.querySelectorAll('[id^="page-"]').forEach(x=>x.classList.add('hidden'));
   document.getElementById('master-panel').classList.remove('hidden');
-  document.querySelectorAll('.menu-item').forEach(x=>x.classList.remove('active'));
-
-  const e=JSON.parse(localStorage.getItem('empresas')||'{}');
-  const empresas=Object.entries(e);
-  const totalEmpresas=empresas.length;
-  const totalConsultoras=empresas.reduce((s,[,v])=>s+(v.consultoras?.length||0),0);
-  const totalLeads=empresas.reduce((s,[,v])=>s+(v.leads?.length||0),0);
-  const totalLancs=empresas.reduce((s,[,v])=>s+(v.lancamentos?.length||0),0);
-
-  document.getElementById('master-content').innerHTML=`
-    <div class="page-header">
-      <h2>👑 Painel Master - GEX</h2>
-      <p>Gerencie todas as empresas parceiras</p>
-    </div>
-
-    <div class="cards-grid">
-      <div class="card" style="border-top-color:#e63946;">
-        <div class="card-label">Total Empresas</div>
-        <div class="card-value" style="color:#e63946;">${totalEmpresas}</div>
-        <div class="card-sub">Parceiras ativas</div>
+  loading(true);
+  try {
+    const snap = await db.collection('empresas').get();
+    const empresas = [];
+    snap.forEach(doc => empresas.push({k: doc.id, ...doc.data()}));
+    loading(false);
+    const totalConsultoras = empresas.reduce((s,e)=>s+(e.consultoras?.length||0),0);
+    const totalLeads = empresas.reduce((s,e)=>s+(e.leads?.length||0),0);
+    const totalLancs = empresas.reduce((s,e)=>s+(e.lancamentos?.length||0),0);
+    document.getElementById('master-content').innerHTML=`
+      <div class="page-header"><h2>👑 Painel Master</h2><p>Gerencie todas as empresas parceiras</p></div>
+      <div class="cards-grid">
+        <div class="card" style="border-top-color:#e63946;"><div class="card-label">Total Empresas</div><div class="card-value" style="color:#e63946;">${empresas.length}</div></div>
+        <div class="card"><div class="card-label">Total Consultoras</div><div class="card-value">${totalConsultoras}</div></div>
+        <div class="card"><div class="card-label">Total Leads</div><div class="card-value">${totalLeads}</div></div>
+        <div class="card"><div class="card-label">Total Lançamentos</div><div class="card-value">${totalLancs}</div></div>
       </div>
-      <div class="card">
-        <div class="card-label">Total Consultoras</div>
-        <div class="card-value">${totalConsultoras}</div>
-        <div class="card-sub">Em todas as empresas</div>
-      </div>
-      <div class="card">
-        <div class="card-label">Total Leads</div>
-        <div class="card-value">${totalLeads}</div>
-        <div class="card-sub">No CRM geral</div>
-      </div>
-      <div class="card">
-        <div class="card-label">Total Lançamentos</div>
-        <div class="card-value">${totalLancs}</div>
-        <div class="card-sub">Registros totais</div>
-      </div>
-    </div>
-
-    <!-- CRIAR NOVA EMPRESA -->
-    <div class="table-box" style="margin-bottom:20px;">
-      <div class="table-header" style="background:#e63946;"><h3>➕ Cadastrar Nova Empresa Parceira</h3></div>
-      <div style="padding:18px;">
-        <div class="form-grid">
-          <div class="form-group"><label>Nome da Empresa</label><input type="text" id="m-emp-nome" placeholder="Ex: Studio Laser SP" /></div>
-          <div class="form-group"><label>Usuário Admin</label><input type="text" id="m-emp-usr" placeholder="Ex: admin_sp" /></div>
-          <div class="form-group"><label>Senha Admin</label><input type="password" id="m-emp-pass" placeholder="Senha do admin" /></div>
-          <div class="form-group"><label>Observação</label><input type="text" id="m-emp-obs" placeholder="Ex: Parceiro desde Jan/2026" /></div>
+      <div class="table-box" style="margin-bottom:20px;">
+        <div class="table-header" style="background:#e63946;"><h3>➕ Nova Empresa Parceira</h3></div>
+        <div style="padding:18px;">
+          <div class="form-grid">
+            <div class="form-group"><label style="color:var(--texto-claro);">Nome da Empresa</label><input type="text" id="m-emp-nome" placeholder="Ex: Studio Laser SP" /></div>
+            <div class="form-group"><label style="color:var(--texto-claro);">Usuário Admin</label><input type="text" id="m-emp-usr" placeholder="Ex: admin_sp" /></div>
+            <div class="form-group"><label style="color:var(--texto-claro);">Senha Admin</label><input type="password" id="m-emp-pass" placeholder="Senha" /></div>
+            <div class="form-group"><label style="color:var(--texto-claro);">Observação</label><input type="text" id="m-emp-obs" placeholder="Ex: Parceiro desde Jan/2026" /></div>
+          </div>
+          <button class="btn-success" onclick="masterCriarEmpresa()">➕ CRIAR EMPRESA</button>
         </div>
-        <button class="btn-success" onclick="masterCriarEmpresa()">➕ CRIAR EMPRESA PARCEIRA</button>
       </div>
-    </div>
-
-    <!-- LISTA EMPRESAS -->
-    <div class="table-box">
-      <div class="table-header"><h3>🏢 Empresas Parceiras Cadastradas</h3></div>
-      <table>
-        <thead>
+      <div class="table-box">
+        <div class="table-header"><h3>🏢 Empresas Parceiras</h3></div>
+        <table><thead><tr><th>Empresa</th><th>Consultoras</th><th>Leads</th><th>Lançamentos</th><th>Usuários</th><th>Ações</th></tr></thead>
+        <tbody>${empresas.filter(e=>e.k!=='__master__').map(e=>`
           <tr>
-            <th>Empresa</th>
-            <th>Consultoras</th>
-            <th>Leads</th>
-            <th>Lançamentos</th>
-            <th>Usuários</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${empresas.length===0?`<tr><td colspan="6" style="text-align:center;color:#aaa;padding:20px;">Nenhuma empresa cadastrada</td></tr>`:
-          empresas.map(([k,v])=>`
-            <tr>
-              <td><strong>${v.nomeEmpresa||k}</strong></td>
-              <td>${v.consultoras?.length||0}</td>
-              <td>${v.leads?.length||0}</td>
-              <td>${v.lancamentos?.length||0}</td>
-              <td>${v.usuarios?.length||0}</td>
-              <td style="display:flex;gap:6px;">
-                <button class="btn-sm" style="background:var(--azul);color:white;padding:6px 10px;" onclick="masterAcessarEmpresa('${k}')">🔑 Acessar</button>
-                <button class="btn-sm" style="background:var(--vermelho);color:white;padding:6px 10px;" onclick="masterRemoverEmpresa('${k}','${v.nomeEmpresa||k}')">🗑️ Remover</button>
-              </td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    </div>
-  `;
+            <td><strong>${e.nomeEmpresa||e.k}</strong></td>
+            <td>${e.consultoras?.length||0}</td>
+            <td>${e.leads?.length||0}</td>
+            <td>${e.lancamentos?.length||0}</td>
+            <td>${e.usuarios?.length||0}</td>
+            <td style="display:flex;gap:6px;">
+              <button class="btn-sm" style="background:var(--azul-eletrico);color:white;padding:6px 10px;" onclick="masterAcessarEmpresa('${e.k}')">🔑 Acessar</button>
+              <button class="btn-sm" style="background:var(--vermelho);color:white;padding:6px 10px;" onclick="masterRemoverEmpresa('${e.k}','${e.nomeEmpresa||e.k}')">🗑️ Remover</button>
+            </td>
+          </tr>`).join('')||'<tr><td colspan="6" style="text-align:center;color:#aaa;padding:20px;">Nenhuma empresa</td></tr>'}
+        </tbody></table>
+      </div>`;
+  } catch(e) { loading(false); alert('Erro: '+e.message); }
 }
-function masterCriarEmpresa() {
-  const nome=document.getElementById('m-emp-nome').value.trim();
-  const usr=document.getElementById('m-emp-usr').value.trim();
-  const pass=document.getElementById('m-emp-pass').value.trim();
-  const obs=document.getElementById('m-emp-obs').value.trim();
-  if(!nome||!usr||!pass) return alert('Preencha nome, usuário e senha!');
-  const e=JSON.parse(localStorage.getItem('empresas')||'{}');
-  const k=nome.toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,'');
-  if(e[k]) return alert('Empresa já existe!');
-  e[k]={nomeEmpresa:nome,obs,consultoras:[],lancamentos:[],leads:[],regras:regrasDefault(),usuarios:[{nome:usr,senha:pass,perfil:'admin'}]};
-  localStorage.setItem('empresas',JSON.stringify(e));
-  ['m-emp-nome','m-emp-usr','m-emp-pass','m-emp-obs'].forEach(id=>document.getElementById(id).value='');
-  alert('✅ Empresa "'+nome+'" criada com sucesso!');
-  renderMaster();
+async function masterCriarEmpresa() {
+  const nome = document.getElementById('m-emp-nome').value.trim();
+  const usr = document.getElementById('m-emp-usr').value.trim();
+  const pass = document.getElementById('m-emp-pass').value.trim();
+  const obs = document.getElementById('m-emp-obs').value.trim();
+  if (!nome||!usr||!pass) return alert('Preencha nome, usuário e senha!');
+  loading(true);
+  try {
+    const k = nome.toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,'');
+    const existe = await getEmpresa(k);
+    if (existe) { loading(false); return alert('Empresa já existe!'); }
+    await saveEmpresa(k, { nomeEmpresa:nome, obs, consultoras:[], lancamentos:[], leads:[], regras:regrasDefault(), usuarios:[{nome:usr,senha:pass,perfil:'admin'}] });
+    loading(false);
+    alert('✅ Empresa "'+nome+'" criada!');
+    renderMaster();
+  } catch(e) { loading(false); alert('Erro: '+e.message); }
 }
-function masterAcessarEmpresa(k) {
-  const e=JSON.parse(localStorage.getItem('empresas')||'{}');
-  const empresa=e[k];
-  if(!empresa) return alert('Empresa não encontrada!');
-  state.empresaAtual=k;
-  state.usuarioLogado={nome:'Master',perfil:'master'};
-  document.getElementById('empresa-nome').textContent=empresa.nomeEmpresa;
-  document.getElementById('user-logado').textContent='👑 Master → '+empresa.nomeEmpresa;
+async function masterAcessarEmpresa(k) {
+  loading(true);
+  const empresa = await getEmpresa(k);
+  loading(false);
+  if (!empresa) return alert('Empresa não encontrada!');
+  state.empresaAtual = k;
+  state.usuarioLogado = {nome:'Master', perfil:'master'};
+  document.getElementById('empresa-nome').textContent = empresa.nomeEmpresa;
+  document.getElementById('user-logado').textContent = '👑 Master → '+empresa.nomeEmpresa;
   document.getElementById('master-panel').classList.add('hidden');
-  document.getElementById('btn-voltar-master').style.display='block';
-  popularSelects(); irPara('dashboard');
+  document.getElementById('btn-voltar-master').style.display = 'block';
+  popularSelects();
+  irPara('dashboard');
 }
-function masterRemoverEmpresa(k, nome) {
-  if(!confirm('⚠️ Remover empresa "'+nome+'" e TODOS os dados? Esta ação não pode ser desfeita!')) return;
-  const e=JSON.parse(localStorage.getItem('empresas')||'{}');
-  delete e[k];
-  localStorage.setItem('empresas',JSON.stringify(e));
-  alert('Empresa removida!');
+async function masterRemoverEmpresa(k, nome) {
+  if (!confirm('⚠️ Remover "'+nome+'" e TODOS os dados?')) return;
+  loading(true);
+  await db.collection('empresas').doc(k).delete();
+  loading(false);
   renderMaster();
 }
 function voltarMaster() {
-  if(state.usuarioLogado?.nome==='Master') {
-    renderMaster();
-  }
+  state.empresaAtual = '__master__';
+  document.getElementById('btn-voltar-master').style.display = 'none';
+  renderMaster();
 }
 
 // ========== NAVEGAÇÃO ==========
@@ -1060,74 +652,56 @@ function irPara(p) {
   if(p==='comissoes') renderComissoes();
   if(p==='usuarios') renderUsuarios();
   if(p==='regras') carregarRegras();
-  if(p==='webhook') renderWebhooks();
-  if(p==='whatsapp') {
-    renderRegrasWA();
-    // Popular select de consultoras no WhatsApp
-    const d=getD();
-    const sel=document.getElementById('wa-cons-auto');
-    if(sel) sel.innerHTML='<option value="">Sem consultora</option>'+d.consultoras.map(c=>`<option>${c.nome}</option>`).join('');
-  }
 }
 
 // ========== SELECTS ==========
-function popularSelects() {
-  const d=getD();
-  const mesesOpts='<option value="0">Todos os meses</option>'+MESES.slice(1).map((m,i)=>`<option value="${i+1}">${m}</option>`).join('');
-  ['dash-mes','lanc-filter-mes','com-mes','funil-mes'].forEach(id=>{
-    const el=document.getElementById(id); if(el) el.innerHTML=mesesOpts;
-  });
-  const consAtivas=d.consultoras.filter(c=>c.status==='Ativa');
-  ['lanc-consultora','lead-cons'].forEach(id=>{
-    const el=document.getElementById(id); if(el) el.innerHTML=consAtivas.map(c=>`<option>${c.nome}</option>`).join('');
-  });
-  ['lanc-filter-cons','kanban-filter-cons','funil-cons'].forEach(id=>{
-    const el=document.getElementById(id); if(el) el.innerHTML='<option value="">Todas</option>'+d.consultoras.map(c=>`<option>${c.nome}</option>`).join('');
-  });
+async function popularSelects() {
+  const d = await getD();
+  const mesesOpts = '<option value="0">Todos os meses</option>'+MESES.slice(1).map((m,i)=>`<option value="${i+1}">${m}</option>`).join('');
+  ['dash-mes','lanc-filter-mes','com-mes','funil-mes'].forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=mesesOpts; });
+  const consAtivas = (d.consultoras||[]).filter(c=>c.status==='Ativa');
+  ['lanc-consultora','lead-cons'].forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=(consAtivas.length?consAtivas.map(c=>`<option>${c.nome}</option>`).join(''):'<option value="">Sem consultora</option>'); });
+  ['lanc-filter-cons','kanban-filter-cons','funil-cons'].forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML='<option value="">Todas</option>'+(d.consultoras||[]).map(c=>`<option>${c.nome}</option>`).join(''); });
 }
 
-// ========== UTILS ==========
-function fmt(v){return 'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
-function fmtK(v){if(v>=1000) return 'R$'+(v/1000).toFixed(1)+'k'; return 'R$'+v.toFixed(0);}
-function abrirModal(id){document.getElementById(id).classList.add('show');}
-function fecharModal(id){document.getElementById(id).classList.remove('show');}
-
 // ========== CONSULTORAS ==========
-function salvarConsultora() {
-  const d=getD();
-  const nome=document.getElementById('cons-nome').value.trim();
-  const meta=parseFloat(document.getElementById('cons-meta').value)||0;
-  const status=document.getElementById('cons-status').value;
-  const obs=document.getElementById('cons-obs').value.trim();
-  if(!nome) return alert('Informe o nome!');
+async function salvarConsultora() {
+  const nome = document.getElementById('cons-nome').value.trim();
+  const meta = parseFloat(document.getElementById('cons-meta').value)||0;
+  const status = document.getElementById('cons-status').value;
+  const obs = document.getElementById('cons-obs').value.trim();
+  if (!nome) return alert('Informe o nome!');
+  loading(true);
+  const d = await getD();
+  d.consultoras = d.consultoras||[];
   d.consultoras.push({id:Date.now(),nome,meta,status,obs});
-  saveD(d); renderConsultoras(); popularSelects();
+  await saveD(d);
+  loading(false);
   document.getElementById('cons-nome').value='';
   document.getElementById('cons-meta').value='';
   document.getElementById('cons-obs').value='';
+  renderConsultoras();
+  popularSelects();
 }
-function renderConsultoras() {
-  const d=getD();
-  document.getElementById('cons-body').innerHTML=d.consultoras.map((c,i)=>`
+async function renderConsultoras() {
+  loading(true);
+  const d = await getD();
+  loading(false);
+  document.getElementById('cons-body').innerHTML=(d.consultoras||[]).map((c,i)=>`
     <tr>
       <td><strong>${c.nome}</strong></td>
       <td id="meta-val-${i}">
         <span id="meta-txt-${i}">${fmt(c.meta)}</span>
-        <input type="number" id="meta-inp-${i}" value="${c.meta}" step="0.01"
-          style="display:none;padding:5px;border:1px solid var(--turquesa);border-radius:6px;width:130px;font-size:13px;"
-          onkeydown="if(event.key==='Enter') salvarMeta(${i})" />
+        <input type="number" id="meta-inp-${i}" value="${c.meta}" step="0.01" style="display:none;padding:5px;border:1px solid var(--azul-eletrico);border-radius:6px;width:130px;font-size:13px;background:rgba(255,255,255,0.05);color:white;" onkeydown="if(event.key==='Enter')salvarMeta(${i})" />
       </td>
-      <td>
-        <span class="badge badge-${c.status==='Ativa'?'ativa':'inativa'}">${c.status}</span>
-      </td>
+      <td><span class="badge badge-${c.status==='Ativa'?'ativa':'inativa'}">${c.status}</span></td>
       <td>${c.obs||'-'}</td>
-      <td style="display:flex;gap:6px;align-items:center;">
-        <button class="btn-sm" id="btn-edit-${i}" style="background:var(--azul);color:white;padding:5px 10px;" onclick="editarMeta(${i})">✏️ Editar</button>
-        <button class="btn-sm" id="btn-save-${i}" style="display:none;background:var(--turquesa);color:white;padding:5px 10px;" onclick="salvarMeta(${i})">💾 Salvar</button>
+      <td style="display:flex;gap:6px;">
+        <button class="btn-sm" id="btn-edit-${i}" style="background:var(--azul-eletrico);color:white;padding:5px 10px;" onclick="editarMeta(${i})">✏️ Editar</button>
+        <button class="btn-sm" id="btn-save-${i}" style="display:none;background:var(--verde);color:white;padding:5px 10px;" onclick="salvarMeta(${i})">💾 Salvar</button>
         <button class="btn-danger" onclick="removerConsultora(${i})">Remover</button>
       </td>
-    </tr>
-  `).join('')||'<tr><td colspan="5" style="text-align:center;color:#aaa;padding:20px;">Nenhuma consultora</td></tr>';
+    </tr>`).join('')||'<tr><td colspan="5" style="text-align:center;color:#aaa;padding:20px;">Nenhuma consultora</td></tr>';
 }
 function editarMeta(i) {
   document.getElementById('meta-txt-'+i).style.display='none';
@@ -1136,73 +710,84 @@ function editarMeta(i) {
   document.getElementById('btn-save-'+i).style.display='inline-block';
   document.getElementById('meta-inp-'+i).focus();
 }
-function salvarMeta(i) {
-  const d=getD();
-  const novaM=parseFloat(document.getElementById('meta-inp-'+i).value)||0;
-  d.consultoras[i].meta=novaM;
-  saveD(d); renderConsultoras(); popularSelects();
+async function salvarMeta(i) {
+  loading(true);
+  const d = await getD();
+  d.consultoras[i].meta = parseFloat(document.getElementById('meta-inp-'+i).value)||0;
+  await saveD(d);
+  loading(false);
+  renderConsultoras();
+  popularSelects();
 }
-function removerConsultora(i){
-  if(!confirm('Remover consultora?')) return;
-  const d=getD(); d.consultoras.splice(i,1); saveD(d); renderConsultoras(); popularSelects();
+async function removerConsultora(i) {
+  if (!confirm('Remover consultora?')) return;
+  loading(true);
+  const d = await getD();
+  d.consultoras.splice(i,1);
+  await saveD(d);
+  loading(false);
+  renderConsultoras();
+  popularSelects();
 }
 
 // ========== LANÇAMENTOS ==========
-function salvarLancamento() {
-  const d=getD();
-  const data=document.getElementById('lanc-data').value;
-  const cons=document.getElementById('lanc-consultora').value;
-  const agend=parseInt(document.getElementById('lanc-agend').value)||0;
-  const comp=parseInt(document.getElementById('lanc-comp').value)||0;
-  const fech=parseInt(document.getElementById('lanc-fech').value)||0;
-  const show=parseFloat(document.getElementById('lanc-show').value)||0;
-  const rec=parseFloat(document.getElementById('lanc-rec').value)||0;
-  const obs=document.getElementById('lanc-obs').value.trim();
-  if(!data||!cons) return alert('Informe data e consultora!');
-  const mes=parseInt(data.split('-')[1]);
-  const ano=parseInt(data.split('-')[0]);
+async function salvarLancamento() {
+  const data = document.getElementById('lanc-data').value;
+  const cons = document.getElementById('lanc-consultora').value;
+  const agend = parseInt(document.getElementById('lanc-agend').value)||0;
+  const comp = parseInt(document.getElementById('lanc-comp').value)||0;
+  const fech = parseInt(document.getElementById('lanc-fech').value)||0;
+  const show = parseFloat(document.getElementById('lanc-show').value)||0;
+  const rec = parseFloat(document.getElementById('lanc-rec').value)||0;
+  const obs = document.getElementById('lanc-obs').value.trim();
+  if (!data||!cons) return alert('Informe data e consultora!');
+  const mes = parseInt(data.split('-')[1]);
+  const ano = parseInt(data.split('-')[0]);
+  loading(true);
+  const d = await getD();
+  d.lancamentos = d.lancamentos||[];
   d.lancamentos.push({id:Date.now(),data,mes,ano,consultora:cons,agendamentos:agend,comparecimentos:comp,fechamentos:fech,showRec:show,recorrente:rec,total:show+rec,obs});
-  saveD(d); renderLancamentos();
+  await saveD(d);
+  loading(false);
   ['lanc-data','lanc-agend','lanc-comp','lanc-fech','lanc-show','lanc-rec','lanc-obs'].forEach(id=>document.getElementById(id).value='');
+  renderLancamentos();
 }
-function renderLancamentos() {
-  const d=getD();
-  const mes=parseInt(document.getElementById('lanc-filter-mes')?.value||0);
-  const cons=document.getElementById('lanc-filter-cons')?.value||'';
-  let l=d.lancamentos;
-  if(mes) l=l.filter(x=>x.mes===mes);
-  if(cons) l=l.filter(x=>x.consultora===cons);
+async function renderLancamentos() {
+  loading(true);
+  const d = await getD();
+  loading(false);
+  const mes = parseInt(document.getElementById('lanc-filter-mes')?.value||0);
+  const cons = document.getElementById('lanc-filter-cons')?.value||'';
+  let l = d.lancamentos||[];
+  if (mes) l = l.filter(x=>x.mes===mes);
+  if (cons) l = l.filter(x=>x.consultora===cons);
   document.getElementById('lanc-body').innerHTML=l.sort((a,b)=>b.data.localeCompare(a.data)).map(x=>`
-    <tr><td>${x.data}</td><td>${MESES[x.mes]}/${x.ano}</td><td><strong>${x.consultora}</strong></td>
-    <td>${x.agendamentos}</td><td>${x.comparecimentos}</td><td>${x.fechamentos}</td>
-    <td>${fmt(x.showRec)}</td><td>${fmt(x.recorrente)}</td><td><strong>${fmt(x.total)}</strong></td>
-    <td>${x.obs||'-'}</td>
+    <tr><td>${x.data}</td><td><strong>${x.consultora}</strong></td><td>${x.agendamentos}</td><td>${x.comparecimentos}</td><td>${x.fechamentos}</td><td>${fmt(x.showRec)}</td><td>${fmt(x.recorrente)}</td><td><strong>${fmt(x.total)}</strong></td><td>${x.obs||'-'}</td>
     <td><button class="btn-danger" onclick="removerLanc(${x.id})">✕</button></td></tr>
-  `).join('')||'<tr><td colspan="11" style="text-align:center;color:#aaa;padding:20px;">Nenhum lançamento</td></tr>';
+  `).join('')||'<tr><td colspan="10" style="text-align:center;color:#aaa;padding:20px;">Nenhum lançamento</td></tr>';
 }
-function removerLanc(id){
-  if(!confirm('Remover?')) return;
-  const d=getD(); d.lancamentos=d.lancamentos.filter(l=>l.id!==id); saveD(d); renderLancamentos();
+async function removerLanc(id) {
+  if (!confirm('Remover?')) return;
+  loading(true);
+  const d = await getD();
+  d.lancamentos = d.lancamentos.filter(l=>l.id!==id);
+  await saveD(d);
+  loading(false);
+  renderLancamentos();
 }
 
-// ========== KANBAN ==========
-function abrirModalLead(leadId) {
-  const d=getD();
-  // Popular select de consultoras manualmente
-  const selCons=document.getElementById('lead-cons');
-  const todas=d.consultoras.filter(c=>c.status==='Ativa');
-  if(todas.length===0) {
-    // Permite cadastrar sem consultora
-    selCons.innerHTML='<option value="">Sem consultora</option>';
-  } else {
-    selCons.innerHTML=todas.map(c=>`<option value="${c.nome}">${c.nome}</option>`).join('');
-  }
-  if(leadId) {
-    const lead=d.leads.find(l=>l.id===leadId);
-    if(!lead) return;
+// ========== LEADS / KANBAN ==========
+async function abrirModalLead(leadId) {
+  const d = await getD();
+  const selCons = document.getElementById('lead-cons');
+  const todas = (d.consultoras||[]).filter(c=>c.status==='Ativa');
+  selCons.innerHTML = todas.length ? todas.map(c=>`<option value="${c.nome}">${c.nome}</option>`).join('') : '<option value="">Sem consultora</option>';
+  if (leadId) {
+    const lead = (d.leads||[]).find(l=>l.id===leadId);
+    if (!lead) return;
     document.getElementById('modal-lead-title').textContent='Editar Lead';
     document.getElementById('lead-id').value=lead.id;
-    document.getElementById('lead-nome').value=lead.nome;
+    document.getElementById('lead-nome').value=lead.nome||'';
     document.getElementById('lead-tel').value=lead.tel||'';
     document.getElementById('lead-cons').value=lead.cons||'';
     document.getElementById('lead-etapa').value=lead.etapa||'Agendamento';
@@ -1217,160 +802,138 @@ function abrirModalLead(leadId) {
   }
   abrirModal('modal-lead');
 }
-function salvarLead() {
-  const d=getD();
-  if(!d.leads) d.leads=[];
-  const id=document.getElementById('lead-id').value;
-  const nome=document.getElementById('lead-nome').value.trim();
-  if(!nome) return alert('Informe o nome do lead!');
-  const lead={
+async function salvarLead() {
+  const nome = document.getElementById('lead-nome').value.trim();
+  if (!nome) return alert('Informe o nome!');
+  const id = document.getElementById('lead-id').value;
+  const lead = {
     id: id?parseInt(id):Date.now(),
-    nome,
-    tel:document.getElementById('lead-tel').value.trim()||'',
+    nome, tel:document.getElementById('lead-tel').value.trim()||'',
     cons:document.getElementById('lead-cons').value||'',
     etapa:document.getElementById('lead-etapa').value||'Agendamento',
     valor:parseFloat(document.getElementById('lead-valor').value)||0,
     obs:document.getElementById('lead-obs').value.trim()||'',
     data:new Date().toISOString().split('T')[0]
   };
-  if(id) {
-    const idx=d.leads.findIndex(l=>l.id===parseInt(id));
-    if(idx>=0) d.leads[idx]=lead; else d.leads.push(lead);
-  } else {
-    d.leads.push(lead);
-  }
-  saveD(d); fecharModal('modal-lead'); renderKanban();
-  // Atualiza funil se visível
-  if(!document.getElementById('page-funil').classList.contains('hidden')) renderFunil();
+  loading(true);
+  const d = await getD();
+  d.leads = d.leads||[];
+  if (id) { const idx=d.leads.findIndex(l=>l.id===parseInt(id)); if(idx>=0) d.leads[idx]=lead; else d.leads.push(lead); }
+  else d.leads.push(lead);
+  await saveD(d);
+  loading(false);
+  fecharModal('modal-lead');
+  renderKanban();
 }
-function moverLead(leadId, novaEtapa) {
-  const d=getD();
-  const lead=d.leads.find(l=>l.id===leadId);
-  if(lead) { lead.etapa=novaEtapa; saveD(d); renderKanban(); renderFunil(); }
-}
-function removerLead(id){
-  if(!confirm('Remover lead?')) return;
-  const d=getD(); d.leads=d.leads.filter(l=>l.id!==id); saveD(d); renderKanban(); renderFunil();
-}
-function renderKanban() {
-  const d=getD();
-  const filtCons=document.getElementById('kanban-filter-cons')?.value||'';
-  let leads=d.leads;
-  if(filtCons) leads=leads.filter(l=>l.cons===filtCons);
-  const board=document.getElementById('kanban-board');
-  board.innerHTML=ETAPAS.map(etapa=>{
-    const cards=leads.filter(l=>l.etapa===etapa);
-    return `
-      <div class="kanban-col" id="col-${etapa}" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="onDrop(event,'${etapa}')">
-        <div class="kanban-col-header">
-          <div class="kanban-col-title">${etapa}</div>
-          <span class="kanban-count">${cards.length}</span>
+async function renderKanban() {
+  loading(true);
+  const d = await getD();
+  loading(false);
+  const filtCons = document.getElementById('kanban-filter-cons')?.value||'';
+  let leads = d.leads||[];
+  if (filtCons) leads = leads.filter(l=>l.cons===filtCons);
+  document.getElementById('kanban-board').innerHTML=ETAPAS.map(etapa=>{
+    const cards = leads.filter(l=>l.etapa===etapa);
+    return `<div class="kanban-col" id="col-${etapa}" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="onDrop(event,'${etapa}')">
+      <div class="kanban-col-header"><div class="kanban-col-title">${etapa}</div><span class="kanban-count">${cards.length}</span></div>
+      ${cards.map(l=>`<div class="kanban-card" draggable="true" ondragstart="onDragStart(event,${l.id})">
+        <div class="card-nome">${l.nome}</div>
+        <div class="card-tel">📞 ${l.tel||'-'}</div>
+        <div class="card-valor">${fmt(l.valor)}</div>
+        <div class="card-resp">👤 ${l.cons||'-'}</div>
+        ${l.obs?`<div style="font-size:11px;color:var(--texto-medio);margin-top:4px;">📝 ${l.obs}</div>`:''}
+        <div class="card-actions">
+          <button class="btn-sm" style="background:var(--azul-eletrico);color:white;" onclick="abrirModalLead(${l.id})">✏️</button>
+          <button class="btn-sm" style="background:var(--vermelho);color:white;" onclick="removerLead(${l.id})">✕</button>
         </div>
-        ${cards.map(l=>`
-          <div class="kanban-card" draggable="true" ondragstart="onDragStart(event,${l.id})">
-            <div class="card-nome">${l.nome}</div>
-            <div class="card-tel">📞 ${l.tel||'-'}</div>
-            <div class="card-valor">${fmt(l.valor)}</div>
-            <div class="card-resp">👤 ${l.cons||'-'}</div>
-            ${l.obs?`<div style="font-size:11px;color:#aaa;margin-top:4px;">📝 ${l.obs}</div>`:''}
-            <div class="card-actions">
-              <button class="btn-sm" style="background:var(--azul);color:white;" onclick="abrirModalLead(${l.id})">✏️</button>
-              <button class="btn-sm" style="background:var(--vermelho);color:white;" onclick="removerLead(${l.id})">✕</button>
-            </div>
-          </div>
-        `).join('')}
-        <button class="kanban-add-btn" onclick="abrirModalComEtapa('${etapa}')">+ Adicionar</button>
-      </div>
-    `;
+      </div>`).join('')}
+      <button class="kanban-add-btn" onclick="abrirModalComEtapa('${etapa}')">+ Adicionar</button>
+    </div>`;
   }).join('');
 }
-let dragLeadId=null;
-function onDragStart(e,id){dragLeadId=id; e.dataTransfer.effectAllowed='move';}
-function onDrop(e,etapa){
+let dragLeadId = null;
+function onDragStart(e,id) { dragLeadId=id; }
+async function onDrop(e, etapa) {
   e.preventDefault();
   document.querySelectorAll('.kanban-col').forEach(c=>c.classList.remove('drag-over'));
-  if(dragLeadId) moverLead(dragLeadId,etapa);
+  if (!dragLeadId) return;
+  loading(true);
+  const d = await getD();
+  const lead = (d.leads||[]).find(l=>l.id===dragLeadId);
+  if (lead) { lead.etapa=etapa; await saveD(d); }
+  loading(false);
   dragLeadId=null;
+  renderKanban();
 }
-function abrirModalComEtapa(etapa){
+async function removerLead(id) {
+  if (!confirm('Remover lead?')) return;
+  loading(true);
+  const d = await getD();
+  d.leads = (d.leads||[]).filter(l=>l.id!==id);
+  await saveD(d);
+  loading(false);
+  renderKanban();
+  renderFunil();
+}
+function abrirModalComEtapa(etapa) {
   abrirModalLead();
-  setTimeout(()=>{document.getElementById('lead-etapa').value=etapa;},100);
+  setTimeout(()=>document.getElementById('lead-etapa').value=etapa,200);
 }
 
 // ========== FUNIL ==========
-function renderFunil() {
+async function renderFunil() {
   try {
-    const d = getD();
-    if (!d.leads) d.leads = [];
-
-    const consEl = document.getElementById('funil-cons');
-    const mesEl = document.getElementById('funil-mes');
-    const cons = consEl ? consEl.value : '';
-    const mes = mesEl ? parseInt(mesEl.value || 0) : 0;
-
-    let leads = [...d.leads];
-    if (cons) leads = leads.filter(l => l.cons === cons);
-
-    const counts = ETAPAS.map(e => ({
-      etapa: e,
-      count: leads.filter(l => l.etapa === e).length
-    }));
-
-    const maxCount = Math.max(...counts.map(c => c.count), 1);
-
-    const visualEl = document.getElementById('funil-visual');
-    if (visualEl) {
-      visualEl.innerHTML = counts.map((c, i) => {
-        const h = Math.max((c.count / maxCount) * 120, 10);
-        const cor = ETAPA_CORES[c.etapa] || '#2a9d8f';
-        const base = counts[0].count > 0 ? counts[0].count : 1;
-        const pct = i === 0 ? 100 : Math.round((c.count / base) * 100);
-        return `<div class="funil-step">
-          <div class="funil-bar-wrap" style="height:140px;justify-content:flex-end;display:flex;flex-direction:column;align-items:center;">
-            <div class="funil-num">${c.count}</div>
-            <div class="funil-bar" style="height:${h}px;background:${cor};width:100%;border-radius:6px 6px 0 0;position:relative;display:flex;align-items:center;justify-content:center;">
-              ${c.count > 0 ? `<span style="font-size:11px;font-weight:700;color:white;">${pct}%</span>` : ''}
-            </div>
+    loading(true);
+    const d = await getD();
+    loading(false);
+    const cons = document.getElementById('funil-cons')?.value||'';
+    let leads = d.leads||[];
+    if (cons) leads = leads.filter(l=>l.cons===cons);
+    const counts = ETAPAS.map(e=>({etapa:e,count:leads.filter(l=>l.etapa===e).length}));
+    const maxCount = Math.max(...counts.map(c=>c.count),1);
+    document.getElementById('funil-visual').innerHTML=counts.map((c,i)=>{
+      const h=Math.max((c.count/maxCount)*120,10);
+      const cor=ETAPA_CORES[c.etapa]||'#2a9d8f';
+      const base=counts[0].count>0?counts[0].count:1;
+      const pct=i===0?100:Math.round((c.count/base)*100);
+      return `<div class="funil-step">
+        <div style="height:140px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;">
+          <div class="funil-num">${c.count}</div>
+          <div style="height:${h}px;background:${cor};width:100%;border-radius:6px 6px 0 0;display:flex;align-items:center;justify-content:center;">
+            ${c.count>0?`<span style="font-size:11px;font-weight:700;color:white;">${pct}%</span>`:''}
           </div>
-          <div class="funil-label">${c.etapa}</div>
-        </div>`;
-      }).join('');
-    }
-
-    const bodyEl = document.getElementById('funil-body');
-    if (bodyEl) {
-      if (leads.length === 0) {
-        bodyEl.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#aaa;padding:20px;">Nenhum lead cadastrado</td></tr>';
-      } else {
-        bodyEl.innerHTML = leads.map(l => {
-          const cor = ETAPA_CORES[l.etapa] || '#2a9d8f';
-          const optsEtapa = ETAPAS.map(e => `<option value="${e}" ${e === l.etapa ? 'selected' : ''}>${e}</option>`).join('');
-          return `<tr>
-            <td><strong>${l.nome || '-'}</strong></td>
-            <td>${l.tel || '-'}</td>
-            <td>${l.cons || '-'}</td>
-            <td><span class="etapa-badge" style="background:${cor}">${l.etapa || '-'}</span></td>
-            <td>${fmt(l.valor || 0)}</td>
-            <td>${l.obs || '-'}</td>
-            <td>
-              <select onchange="moverLead(${l.id}, this.value)" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;">
-                ${optsEtapa}
-              </select>
-              <button class="btn-danger" onclick="removerLead(${l.id})" style="margin-left:4px;">✕</button>
-            </td>
-          </tr>`;
-        }).join('');
-      }
-    }
-  } catch(err) {
-    console.error('Erro no funil:', err);
-    const bodyEl = document.getElementById('funil-body');
-    if (bodyEl) bodyEl.innerHTML = '<tr><td colspan="7" style="text-align:center;color:red;padding:20px;">Erro ao carregar funil. Tente novamente.</td></tr>';
-  }
+        </div>
+        <div class="funil-label">${c.etapa}</div>
+      </div>`;
+    }).join('');
+    document.getElementById('funil-body').innerHTML=leads.map(l=>{
+      const cor=ETAPA_CORES[l.etapa]||'#2a9d8f';
+      return `<tr>
+        <td><strong>${l.nome||'-'}</strong></td><td>${l.tel||'-'}</td><td>${l.cons||'-'}</td>
+        <td><span class="etapa-badge" style="background:${cor}">${l.etapa||'-'}</span></td>
+        <td>${fmt(l.valor||0)}</td><td>${l.obs||'-'}</td>
+        <td>
+          <select onchange="moverLead(${l.id},this.value)" style="padding:4px;border:1px solid var(--borda);border-radius:4px;font-size:12px;background:rgba(255,255,255,0.05);color:white;">
+            ${ETAPAS.map(e=>`<option value="${e}" ${e===l.etapa?'selected':''}>${e}</option>`).join('')}
+          </select>
+          <button class="btn-danger" onclick="removerLead(${l.id})" style="margin-left:4px;">✕</button>
+        </td>
+      </tr>`;
+    }).join('')||'<tr><td colspan="7" style="text-align:center;color:#aaa;padding:20px;">Nenhum lead</td></tr>';
+  } catch(err) { loading(false); console.error(err); }
+}
+async function moverLead(leadId, novaEtapa) {
+  loading(true);
+  const d = await getD();
+  const lead = (d.leads||[]).find(l=>l.id===leadId);
+  if (lead) { lead.etapa=novaEtapa; await saveD(d); }
+  loading(false);
+  renderKanban();
+  renderFunil();
 }
 
 // ========== COMISSÕES ==========
-function calcCom(cons,lancs,regras) {
+function calcCom(cons, lancs, regras) {
   const total=lancs.reduce((s,l)=>s+l.total,0);
   const show=lancs.reduce((s,l)=>s+l.showRec,0);
   const rec=lancs.reduce((s,l)=>s+l.recorrente,0);
@@ -1378,15 +941,17 @@ function calcCom(cons,lancs,regras) {
   const ok=total>=(regras.cutoff||30000);
   if(!ok) return {total,show,rec,pct,ok,pctS:0,pctR:0,cS:0,cR:0,cT:0};
   let f=regras.escala[0];
-  for(let x of regras.escala){if(pct>=x.min) f=x;}
+  for(let x of regras.escala){if(pct>=x.min)f=x;}
   return {total,show,rec,pct,ok,pctS:f.show,pctR:f.rec,cS:show*(f.show/100),cR:rec*(f.rec/100),cT:show*(f.show/100)+rec*(f.rec/100)};
 }
-function renderComissoes() {
-  const d=getD();
-  const mes=parseInt(document.getElementById('com-mes')?.value||0);
-  let lancs=d.lancamentos;
-  if(mes) lancs=lancs.filter(l=>l.mes===mes);
-  document.getElementById('com-body').innerHTML=d.consultoras.map(c=>{
+async function renderComissoes() {
+  loading(true);
+  const d = await getD();
+  loading(false);
+  const mes = parseInt(document.getElementById('com-mes')?.value||0);
+  let lancs = d.lancamentos||[];
+  if (mes) lancs=lancs.filter(l=>l.mes===mes);
+  document.getElementById('com-body').innerHTML=(d.consultoras||[]).map(c=>{
     const cl=lancs.filter(l=>l.consultora===c.nome);
     const r=calcCom(c,cl,d.regras||regrasDefault());
     return `<tr><td><strong>${c.nome}</strong></td><td>${fmt(r.total)}</td><td>${fmt(c.meta)}</td>
@@ -1398,51 +963,40 @@ function renderComissoes() {
 }
 
 // ========== DASHBOARD ==========
-function atualizarDashboard() {
-  const d=getD();
-  const mes=parseInt(document.getElementById('dash-mes')?.value||0);
-  let lancs=d.lancamentos;
-  if(mes) lancs=lancs.filter(l=>l.mes===mes);
+async function atualizarDashboard() {
+  loading(true);
+  const d = await getD();
+  loading(false);
+  const mes = parseInt(document.getElementById('dash-mes')?.value||0);
+  let lancs = d.lancamentos||[];
+  if (mes) lancs=lancs.filter(l=>l.mes===mes);
   const rec=lancs.reduce((s,l)=>s+l.total,0);
-  const meta=d.consultoras.reduce((s,c)=>s+c.meta,0);
+  const meta=(d.consultoras||[]).reduce((s,c)=>s+c.meta,0);
   const bat=meta>0?(rec/meta)*100:0;
   const ag=lancs.reduce((s,l)=>s+l.agendamentos,0);
   const co=lancs.reduce((s,l)=>s+l.comparecimentos,0);
   const fe=lancs.reduce((s,l)=>s+l.fechamentos,0);
   const rg=d.regras||regrasDefault();
-  let comT=0; d.consultoras.forEach(c=>{const cl=lancs.filter(l=>l.consultora===c.nome); comT+=calcCom(c,cl,rg).cT;});
+  let comT=0; (d.consultoras||[]).forEach(c=>{const cl=lancs.filter(l=>l.consultora===c.nome);comT+=calcCom(c,cl,rg).cT;});
   document.getElementById('card-receita').textContent=fmt(rec);
   document.getElementById('card-meta').textContent=fmt(meta);
-
   const batEl=document.getElementById('card-bat');
   batEl.textContent=bat.toFixed(1)+'%';
-  batEl.style.color=bat>=100?'#2a9d8f':bat>=80?'#e67e22':'#e63946';
-
-  const faltaEl=document.getElementById('card-bat-sub');
-  if(faltaEl) {
-    if(rec===0&&meta===0) faltaEl.textContent='Sem dados';
-    else if(bat>=100) faltaEl.textContent='✅ Meta atingida!';
-    else faltaEl.textContent='Falta '+fmt(meta-rec);
-  }
-
+  batEl.style.color=bat>=100?'#00cc44':bat>=80?'#f39c12':'#ff6b78';
+  const sub=document.getElementById('card-bat-sub');
+  if(sub){if(rec===0&&meta===0)sub.textContent='Sem dados';else if(bat>=100)sub.textContent='✅ Meta atingida!';else sub.textContent='Falta '+fmt(meta-rec);}
   document.getElementById('card-com').textContent=fmt(comT);
   document.getElementById('card-agend').textContent=ag;
   document.getElementById('card-comp').textContent=co;
   document.getElementById('card-fech').textContent=fe;
-  document.getElementById('card-leads').textContent=d.leads?.length||0;
-  // Gráfico
-  const maxR=Math.max(...d.consultoras.map(c=>lancs.filter(l=>l.consultora===c.nome).reduce((s,l)=>s+l.total,0)),1);
-  document.getElementById('grafico-consultoras').innerHTML=d.consultoras.map(c=>{
+  document.getElementById('card-leads').textContent=(d.leads||[]).length;
+  const maxR=Math.max(...(d.consultoras||[]).map(c=>lancs.filter(l=>l.consultora===c.nome).reduce((s,l)=>s+l.total,0)),1);
+  document.getElementById('grafico-consultoras').innerHTML=(d.consultoras||[]).map(c=>{
     const rv=lancs.filter(l=>l.consultora===c.nome).reduce((s,l)=>s+l.total,0);
     const h=Math.max((rv/maxR)*120,4);
     return `<div class="bar-wrap"><div class="bar-val">${fmtK(rv)}</div><div class="bar" style="height:${h}px"></div><div class="bar-label">${c.nome.split(' ')[0]}</div></div>`;
   }).join('')||'<p style="color:#aaa;font-size:13px;">Sem dados</p>';
-  // Ranking
-  const ranking=d.consultoras.map(c=>{
-    const cl=lancs.filter(l=>l.consultora===c.nome);
-    const r=calcCom(c,cl,rg);
-    return {...r,nome:c.nome,meta:c.meta};
-  }).sort((a,b)=>b.total-a.total);
+  const ranking=(d.consultoras||[]).map(c=>{const cl=lancs.filter(l=>l.consultora===c.nome);const r=calcCom(c,cl,rg);return {...r,nome:c.nome,meta:c.meta};}).sort((a,b)=>b.total-a.total);
   document.getElementById('ranking-body').innerHTML=ranking.map((r,i)=>`
     <tr><td><strong>${i+1}º</strong></td><td>${r.nome}</td><td>${fmt(r.total)}</td><td>${fmt(r.meta)}</td>
     <td class="${r.pct>=100?'text-green':'text-red'}">${r.pct.toFixed(1)}%</td>
@@ -1452,254 +1006,82 @@ function atualizarDashboard() {
 }
 
 // ========== REGRAS ==========
-function carregarRegras() {
-  const d=getD(); const r=d.regras||regrasDefault();
+async function carregarRegras() {
+  loading(true);
+  const d = await getD();
+  loading(false);
+  const r = d.regras||regrasDefault();
   document.getElementById('cutoff').value=r.cutoff;
   document.getElementById('base-show').value=r.baseShow;
   document.getElementById('base-rec').value=r.baseRec;
 }
-function salvarRegras() {
-  const d=getD();
-  const rows=document.querySelectorAll('#regras-body tr');
-  const mins=[0,120,130,135];
-  const escala=Array.from(rows).map((row,i)=>{
+async function salvarRegras() {
+  loading(true);
+  const d = await getD();
+  const rows = document.querySelectorAll('#regras-body tr');
+  const mins = [0,120,130,135];
+  const escala = Array.from(rows).map((row,i)=>{
     const inp=row.querySelectorAll('input');
     return {min:mins[i],show:parseFloat(inp[0].value),rec:parseFloat(inp[1].value)};
   });
-  d.regras={cutoff:parseFloat(document.getElementById('cutoff').value),baseShow:parseFloat(document.getElementById('base-show').value),baseRec:parseFloat(document.getElementById('base-rec').value),escala};
-  saveD(d); alert('✅ Regras salvas!');
-}
-
-// ========== WEBHOOK ==========
-function copiarWebhook(id) {
-  const el=document.getElementById(id);
-  navigator.clipboard.writeText(el.value).then(()=>alert('✅ URL copiada!')).catch(()=>{el.select();document.execCommand('copy');alert('✅ URL copiada!');});
-}
-function salvarWebhook() {
-  const d=getD();
-  if(!d.webhooks) d.webhooks=[];
-  const nome=document.getElementById('wh-nome').value.trim();
-  const url=document.getElementById('wh-url').value.trim();
-  const evento=document.getElementById('wh-evento').value;
-  const metodo=document.getElementById('wh-metodo').value;
-  if(!nome||!url) return alert('Informe nome e URL!');
-  d.webhooks.push({id:Date.now(),nome,url,evento,metodo,ativo:true,ultimoDisparo:null});
-  saveD(d); renderWebhooks();
-  document.getElementById('wh-nome').value='';
-  document.getElementById('wh-url').value='';
-}
-function renderWebhooks() {
-  const d=getD();
-  if(!d.webhooks) d.webhooks=[];
-  const eventos={'novo_lead':'Novo Lead','lead_movido':'Lead Movido','novo_lancamento':'Novo Lançamento','meta_atingida':'Meta Atingida','todos':'Todos'};
-  document.getElementById('wh-body').innerHTML=d.webhooks.map((w,i)=>`
-    <tr>
-      <td><strong>${w.nome}</strong></td>
-      <td style="font-size:11px;font-family:monospace;">${w.url.substring(0,40)}...</td>
-      <td><span class="badge badge-ok">${eventos[w.evento]||w.evento}</span></td>
-      <td>${w.metodo}</td>
-      <td><span class="badge ${w.ativo?'badge-ok':'badge-abaixo'}">${w.ativo?'✅ Ativo':'⏸️ Pausado'}</span></td>
-      <td style="font-size:11px;">${w.ultimoDisparo||'Nunca'}</td>
-      <td style="display:flex;gap:4px;">
-        <button class="btn-sm" style="background:var(--azul);color:white;" onclick="testarWebhookEspecifico(${i})">🧪 Testar</button>
-        <button class="btn-danger" onclick="removerWebhook(${i})">✕</button>
-      </td>
-    </tr>
-  `).join('')||'<tr><td colspan="7" style="text-align:center;color:#aaa;padding:20px;">Nenhum webhook configurado</td></tr>';
-}
-function removerWebhook(i) {
-  if(!confirm('Remover webhook?')) return;
-  const d=getD(); d.webhooks.splice(i,1); saveD(d); renderWebhooks();
-}
-function adicionarLog(msg,tipo='info') {
-  const logs=document.getElementById('wh-logs');
-  if(!logs) return;
-  const cor=tipo==='success'?'#2ecc71':tipo==='error'?'#e74c3c':'#2a9d8f';
-  const hora=new Date().toLocaleTimeString('pt-BR');
-  logs.innerHTML+=`<div style="color:${cor};margin-bottom:4px;">[${hora}] ${msg}</div>`;
-  logs.scrollTop=logs.scrollHeight;
-}
-async function testarWebhookEspecifico(i) {
-  const d=getD();
-  const wh=d.webhooks[i];
-  if(!wh) return;
-  adicionarLog(`🧪 Testando "${wh.nome}" → ${wh.url}`);
-  try {
-    const payload={evento:'teste',sistema:'GestaoPro',timestamp:new Date().toISOString(),dados:{mensagem:'Teste de webhook do sistema'}};
-    await fetch(wh.url,{method:wh.metodo,headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),mode:'no-cors'});
-    d.webhooks[i].ultimoDisparo=new Date().toLocaleString('pt-BR');
-    saveD(d); renderWebhooks();
-    adicionarLog(`✅ Disparo enviado para "${wh.nome}"!`,'success');
-  } catch(err) {
-    adicionarLog(`❌ Erro ao disparar "${wh.nome}": ${err.message}`,'error');
-  }
-}
-function testarWebhook() {
-  adicionarLog('🧪 Iniciando teste geral de webhooks...');
-  const d=getD();
-  if(!d.webhooks||d.webhooks.length===0) { adicionarLog('⚠️ Nenhum webhook configurado!','error'); return; }
-  d.webhooks.forEach((_,i)=>testarWebhookEspecifico(i));
-}
-function limparLogs() {
-  const logs=document.getElementById('wh-logs');
-  if(logs) logs.innerHTML='<div style="color:#666;">Logs limpos.</div>';
-}
-async function dispararWebhooks(evento, dados) {
-  const d=getD();
-  if(!d.webhooks) return;
-  const hooks=d.webhooks.filter(w=>w.ativo&&(w.evento===evento||w.evento==='todos'));
-  for(const wh of hooks) {
-    try {
-      const payload={evento,timestamp:new Date().toISOString(),dados};
-      await fetch(wh.url,{method:wh.metodo,headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),mode:'no-cors'});
-      adicionarLog(`✅ Webhook "${wh.nome}" disparado (${evento})`,'success');
-    } catch(err) {
-      adicionarLog(`❌ Erro webhook "${wh.nome}": ${err.message}`,'error');
-    }
-  }
-}
-
-// ========== WHATSAPP ==========
-function conectarEvolution() {
-  const url=document.getElementById('wa-evo-url').value.trim();
-  const key=document.getElementById('wa-evo-key').value.trim();
-  if(!url||!key) return alert('Informe URL e API Key!');
-  document.getElementById('wa-qr-box').style.display='block';
-  document.getElementById('wa-status').textContent='🟡 Aguardando QR Code...';
-  document.getElementById('wa-status').style.color='#f39c12';
-  adicionarLogWA('📡 Conectando via Evolution API...');
-  setTimeout(()=>{
-    document.getElementById('wa-status').textContent='🟢 Conectado!';
-    document.getElementById('wa-status').style.color='#25D366';
-    adicionarLogWA('✅ Evolution API conectada! Escaneie o QR Code.');
-  },2000);
-}
-function conectarZAPI() {
-  const id=document.getElementById('wa-zapi-id').value.trim();
-  const token=document.getElementById('wa-zapi-token').value.trim();
-  if(!id||!token) return alert('Informe Instance ID e Token!');
-  document.getElementById('wa-qr-box').style.display='block';
-  document.getElementById('wa-status').textContent='🟡 Aguardando QR Code...';
-  document.getElementById('wa-status').style.color='#f39c12';
-  adicionarLogWA('📡 Conectando via Z-API...');
-  setTimeout(()=>{
-    document.getElementById('wa-status').textContent='🟢 Conectado!';
-    document.getElementById('wa-status').style.color='#25D366';
-    adicionarLogWA('✅ Z-API conectada! Escaneie o QR Code.');
-  },2000);
-}
-function salvarRegraWA() {
-  const d=getD();
-  if(!d.regrasWA) d.regrasWA=[];
-  const kw=document.getElementById('wa-keyword').value.trim();
-  const acao=document.getElementById('wa-acao').value;
-  const etapa=document.getElementById('wa-etapa-auto').value;
-  const cons=document.getElementById('wa-cons-auto').value;
-  const resp=document.getElementById('wa-resposta').value.trim();
-  if(!kw) return alert('Informe a palavra-chave!');
-  d.regrasWA.push({id:Date.now(),keyword:kw,acao,etapa,cons,resposta:resp});
-  saveD(d); renderRegrasWA();
-  document.getElementById('wa-keyword').value='';
-  document.getElementById('wa-resposta').value='';
-}
-function renderRegrasWA() {
-  const d=getD();
-  if(!d.regrasWA) d.regrasWA=[];
-  const acoes={'criar_lead':'Criar Lead','mover_etapa':'Mover Etapa','notificar':'Notificar','responder':'Resposta Auto'};
-  document.getElementById('wa-regras-body').innerHTML=d.regrasWA.map((r,i)=>`
-    <tr>
-      <td><strong>"${r.keyword}"</strong></td>
-      <td><span class="badge badge-ok">${acoes[r.acao]||r.acao}</span></td>
-      <td>${r.etapa||'-'}</td>
-      <td>${r.cons||'-'}</td>
-      <td style="font-size:11px;">${r.resposta||'-'}</td>
-      <td><button class="btn-danger" onclick="removerRegraWA(${i})">✕</button></td>
-    </tr>
-  `).join('')||'<tr><td colspan="6" style="text-align:center;color:#aaa;padding:20px;">Nenhuma regra configurada</td></tr>';
-}
-function removerRegraWA(i) {
-  const d=getD(); d.regrasWA.splice(i,1); saveD(d); renderRegrasWA();
-}
-function simularMensagem() {
-  const msg=document.getElementById('wa-msg-teste').value.trim();
-  if(!msg) return alert('Digite uma mensagem!');
-  const d=getD();
-  const hora=new Date().toLocaleTimeString('pt-BR');
-  const conv=document.getElementById('wa-conversas');
-  // Mensagem recebida
-  conv.innerHTML+=`
-    <div style="display:flex;margin-bottom:10px;">
-      <div style="background:white;padding:10px 14px;border-radius:0 10px 10px 10px;max-width:80%;box-shadow:0 1px 2px rgba(0,0,0,0.1);">
-        <div style="font-size:11px;color:#888;margin-bottom:4px;">📱 Contato</div>
-        <div style="font-size:13px;">${msg}</div>
-        <div style="font-size:10px;color:#aaa;text-align:right;margin-top:4px;">${hora}</div>
-      </div>
-    </div>`;
-  conv.scrollTop=conv.scrollHeight;
-  // Verificar regras
-  if(d.regrasWA) {
-    const regra=d.regrasWA.find(r=>msg.toLowerCase().includes(r.keyword.toLowerCase()));
-    if(regra) {
-      adicionarLogWA(`🤖 Regra ativada: "${regra.keyword}" → ${regra.acao}`);
-      if(regra.acao==='criar_lead') {
-        if(!d.leads) d.leads=[];
-        d.leads.push({id:Date.now(),nome:'Lead WhatsApp',tel:'Via WhatsApp',cons:regra.cons||'',etapa:regra.etapa||'Agendamento',valor:0,obs:msg,data:new Date().toISOString().split('T')[0]});
-        saveD(d);
-        document.getElementById('wa-leads').textContent=d.leads.length;
-        adicionarLogWA('✅ Lead criado automaticamente!');
-      }
-      if(regra.resposta) {
-        setTimeout(()=>{
-          conv.innerHTML+=`
-            <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
-              <div style="background:#DCF8C6;padding:10px 14px;border-radius:10px 0 10px 10px;max-width:80%;box-shadow:0 1px 2px rgba(0,0,0,0.1);">
-                <div style="font-size:11px;color:#888;margin-bottom:4px;">🤖 Resposta Automática</div>
-                <div style="font-size:13px;">${regra.resposta}</div>
-                <div style="font-size:10px;color:#aaa;text-align:right;margin-top:4px;">${new Date().toLocaleTimeString('pt-BR')}</div>
-              </div>
-            </div>`;
-          conv.scrollTop=conv.scrollHeight;
-        },1000);
-      }
-    }
-  }
-  // Atualizar contadores
-  const atual=parseInt(document.getElementById('wa-recebidas').textContent)||0;
-  document.getElementById('wa-recebidas').textContent=atual+1;
-  document.getElementById('wa-msg-teste').value='';
-  dispararWebhooks('nova_mensagem_whatsapp',{mensagem:msg,hora});
-}
-function adicionarLogWA(msg) {
-  const logs=document.getElementById('wh-logs');
-  if(!logs) return;
-  const hora=new Date().toLocaleTimeString('pt-BR');
-  logs.innerHTML+=`<div style="color:#25D366;margin-bottom:4px;">[${hora}] ${msg}</div>`;
-  logs.scrollTop=logs.scrollHeight;
+  d.regras = {cutoff:parseFloat(document.getElementById('cutoff').value),baseShow:parseFloat(document.getElementById('base-show').value),baseRec:parseFloat(document.getElementById('base-rec').value),escala};
+  await saveD(d);
+  loading(false);
+  alert('✅ Regras salvas!');
 }
 
 // ========== USUÁRIOS ==========
-function salvarUsuario() {
-  const d=getD();
-  const nome=document.getElementById('usr-nome').value.trim();
-  const pass=document.getElementById('usr-pass').value.trim();
-  const perfil=document.getElementById('usr-perfil').value;
-  if(!nome||!pass) return alert('Preencha tudo!');
-  if(d.usuarios.find(u=>u.nome===nome)) return alert('Usuário já existe!');
-  d.usuarios.push({nome,senha:pass,perfil}); saveD(d);
-  document.getElementById('usr-nome').value=''; document.getElementById('usr-pass').value='';
+async function salvarUsuario() {
+  const nome = document.getElementById('usr-nome').value.trim();
+  const pass = document.getElementById('usr-pass').value.trim();
+  const perfil = document.getElementById('usr-perfil').value;
+  if (!nome||!pass) return alert('Preencha tudo!');
+  loading(true);
+  const d = await getD();
+  d.usuarios = d.usuarios||[];
+  if (d.usuarios.find(u=>u.nome===nome)) { loading(false); return alert('Usuário já existe!'); }
+  d.usuarios.push({nome,senha:pass,perfil});
+  await saveD(d);
+  loading(false);
+  document.getElementById('usr-nome').value='';
+  document.getElementById('usr-pass').value='';
   renderUsuarios();
 }
-function renderUsuarios() {
-  const d=getD();
-  document.getElementById('usr-body').innerHTML=d.usuarios.map((u,i)=>`
+async function renderUsuarios() {
+  loading(true);
+  const d = await getD();
+  loading(false);
+  document.getElementById('usr-body').innerHTML=(d.usuarios||[]).map((u,i)=>`
     <tr><td><strong>${u.nome}</strong></td><td><span class="badge badge-ok">${u.perfil}</span></td>
     <td>${u.perfil!=='admin'?`<button class="btn-danger" onclick="removerUsr(${i})">Remover</button>`:'-'}</td></tr>
   `).join('');
 }
-function removerUsr(i){
-  if(!confirm('Remover usuário?')) return;
-  const d=getD(); d.usuarios.splice(i,1); saveD(d); renderUsuarios();
+async function removerUsr(i) {
+  if (!confirm('Remover usuário?')) return;
+  loading(true);
+  const d = await getD();
+  d.usuarios.splice(i,1);
+  await saveD(d);
+  loading(false);
+  renderUsuarios();
 }
+
+// ========== TEMA ==========
+function setTema(tema) {
+  localStorage.setItem('tema',tema);
+  const r=document.documentElement.style;
+  if(tema==='azul'){r.setProperty('--azul-escuro','#0a1428');document.body.style.background='#0a1428';}
+  else if(tema==='preto'){r.setProperty('--azul-escuro','#0a0a0a');document.body.style.background='#0a0a0a';}
+  else if(tema==='branco'){r.setProperty('--azul-escuro','#f4f4f4');document.body.style.background='#f4f4f4';}
+}
+
+// ========== INIT ==========
+window.addEventListener('load', ()=>{
+  loading(false);
+  document.getElementById('login-screen').style.display='flex';
+  const tema=localStorage.getItem('tema')||'azul';
+  setTema(tema);
+});
 </script>
 </body>
 </html>
