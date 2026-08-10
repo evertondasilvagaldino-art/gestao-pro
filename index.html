@@ -578,7 +578,8 @@ function showAlert(msg, tipo='error') {
   setTimeout(()=>el.innerHTML='', 4000);
 }
 function loading(show) {
-  document.getElementById('loading').style.display = show ? 'flex' : 'none';
+  const el = document.getElementById('loading');
+  if(el) el.style.display = show ? 'flex' : 'none';
 }
 
 // ========== AUTH ==========
@@ -1407,16 +1408,8 @@ function setTema(tema) {
 }
 
 // ========== INIT ==========
-window.addEventListener('load', async () => {
-  try {
-    // Testa conexão com Firebase com timeout
-    await Promise.race([
-      db.collection('empresas').limit(1).get(),
-      new Promise((_,reject) => setTimeout(()=>reject(new Error('timeout')), 5000))
-    ]);
-  } catch(e) {
-    console.warn('Firebase:', e.message);
-  }
+window.addEventListener('load', () => {
+  // Mostra login imediatamente sem esperar Firebase
   loading(false);
   document.getElementById('login-screen').style.display='flex';
   const tema = localStorage.getItem('tema')||'azul';
