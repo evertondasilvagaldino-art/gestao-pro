@@ -965,9 +965,59 @@ async function removerUsr(i){if(!confirm('Remover?'))return;const d=await getD()
 // ========== TEMA ==========
 function setTema(t){
   localStorage.setItem('tema',t);
-  if(t==='preto'){document.body.style.background='#0a0a0a';}
-  else if(t==='branco'){document.body.style.background='#f4f4f4';}
-  else{document.body.style.background='#0a1428';}
+  const r=document.documentElement;
+  if(t==='preto'){
+    document.body.style.background='#0a0a0a';
+    r.style.setProperty('--borda','#333');
+    r.style.setProperty('--texto-claro','#ddd');
+    r.style.setProperty('--texto-medio','#888');
+    r.style.setProperty('--azul-escuro','#0a0a0a');
+    document.querySelectorAll('.card,.table-box,.regras-box,.chart-box,.funil-box,.filter-bar,.kanban-col,.modal').forEach(el=>{el.style.background='rgba(20,20,20,0.95)';});
+    document.querySelectorAll('td,th,.card-value,.card-label,.card-sub,.page-header h2,.page-header p,.kanban-col-title,.funil-label,.funil-num').forEach(el=>{el.style.color='';});
+  } else if(t==='branco'){
+    document.body.style.background='#f0f2f5';
+    r.style.setProperty('--borda','#d0d7e3');
+    r.style.setProperty('--texto-claro','#1a2b4a');
+    r.style.setProperty('--texto-medio','#4a6080');
+    r.style.setProperty('--azul-escuro','#f0f2f5');
+    // Fundo dos elementos
+    document.querySelectorAll('.card').forEach(el=>{el.style.background='#ffffff';el.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)';});
+    document.querySelectorAll('.table-box').forEach(el=>{el.style.background='#ffffff';});
+    document.querySelectorAll('.regras-box,.chart-box,.funil-box').forEach(el=>{el.style.background='#ffffff';el.style.border='1px solid #d0d7e3';});
+    document.querySelectorAll('.filter-bar').forEach(el=>{el.style.background='#ffffff';el.style.border='1px solid #d0d7e3';});
+    document.querySelectorAll('.kanban-col').forEach(el=>{el.style.background='#e8ecf2';el.style.border='1px solid #d0d7e3';});
+    document.querySelectorAll('.kanban-card').forEach(el=>{el.style.background='#ffffff';el.style.border='1px solid #d0d7e3';});
+    document.querySelectorAll('.modal').forEach(el=>{el.style.background='#ffffff';});
+    // Textos
+    document.querySelectorAll('.card-value').forEach(el=>{el.style.color='#1a2b4a';});
+    document.querySelectorAll('.card-label,.card-sub').forEach(el=>{el.style.color='#4a6080';});
+    document.querySelectorAll('.page-header h2').forEach(el=>{el.style.color='#1a2b4a';});
+    document.querySelectorAll('.page-header p').forEach(el=>{el.style.color='#4a6080';});
+    document.querySelectorAll('td').forEach(el=>{el.style.color='#1a2b4a';});
+    document.querySelectorAll('th').forEach(el=>{el.style.color='#ffffff';});
+    document.querySelectorAll('.regras-box h3').forEach(el=>{el.style.color='#1a6fff';});
+    document.querySelectorAll('.chart-box h3,.funil-box h3').forEach(el=>{el.style.color='#1a2b4a';});
+    document.querySelectorAll('.kanban-col-title').forEach(el=>{el.style.color='#1a2b4a';});
+    document.querySelectorAll('.card-nome').forEach(el=>{el.style.color='#1a2b4a';});
+    document.querySelectorAll('.card-tel,.card-resp').forEach(el=>{el.style.color='#4a6080';});
+    document.querySelectorAll('.funil-label').forEach(el=>{el.style.color='#4a6080';});
+    document.querySelectorAll('.funil-num').forEach(el=>{el.style.color='#1a6fff';});
+    document.querySelectorAll('.regra-row label').forEach(el=>{el.style.color='#1a2b4a';});
+    document.querySelectorAll('.regra-row input,.form-group input,.form-group select,.filter-bar input,.filter-bar select').forEach(el=>{el.style.background='#f8f9fa';el.style.color='#1a2b4a';el.style.border='1px solid #d0d7e3';});
+    document.querySelectorAll('.bar-label,.bar-val').forEach(el=>{el.style.color='#4a6080';});
+    document.querySelectorAll('.kanban-add-btn').forEach(el=>{el.style.color='#4a6080';el.style.borderColor='#d0d7e3';});
+  } else {
+    // Azul (padrão)
+    document.body.style.background='#0a1428';
+    r.style.setProperty('--borda','#1e3060');
+    r.style.setProperty('--texto-claro','#c8d8ff');
+    r.style.setProperty('--texto-medio','#7a99cc');
+    r.style.setProperty('--azul-escuro','#0a1428');
+    document.querySelectorAll('.card').forEach(el=>{el.style.background='';el.style.boxShadow='';});
+    document.querySelectorAll('.table-box,.regras-box,.chart-box,.funil-box,.filter-bar,.kanban-col,.kanban-card,.modal').forEach(el=>{el.style.background='';el.style.border='';});
+    document.querySelectorAll('.card-value,.card-label,.card-sub,.page-header h2,.page-header p,td,th,.regras-box h3,.chart-box h3,.funil-box h3,.kanban-col-title,.card-nome,.card-tel,.card-resp,.funil-label,.funil-num,.regra-row label,.bar-label,.bar-val,.kanban-add-btn').forEach(el=>{el.style.color='';el.style.background='';el.style.border='';});
+    document.querySelectorAll('.regra-row input,.form-group input,.form-group select,.filter-bar input,.filter-bar select').forEach(el=>{el.style.background='rgba(255,255,255,0.05)';el.style.color='white';el.style.border='1px solid var(--borda)';});
+  }
 }
 
 // ========== INIT ==========
